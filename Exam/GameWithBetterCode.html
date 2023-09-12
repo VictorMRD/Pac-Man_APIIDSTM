@@ -182,25 +182,26 @@
             }
 
             //Variables para dibujar secciones de pared
-            let altura = 14, anchura = 50, alturav = 50, anchurav = 14, grosorLinea = 8, walls = [];
+            let altura = 14, anchura = 58, alturav = 58, anchurav = 13, grosorLinea = 8, walls = [];
+            let gap = 1;
             let createFlag = false;
             let _indexx = 0;
             function cuerpoRectangulo(_x,_y,_orientacion,_agujero){
                 ctx.beginPath();
-                ctx.fillStyle = "yellow";
+                ctx.fillStyle = "yellowaa";
                 if(_orientacion == 1){
                     if(!createFlag)
-                        walls[_indexx] = (new Wall(_x,_y,anchura,altura+4));
+                        walls[_indexx] = (new Wall(_x,_y,anchura,altura));
                     
                     if(walls[_indexx].getX == 9999){
                         _indexx++;
                         return;
                     }else 
-                        ctx.rect(walls[_indexx].getX,walls[_indexx].getY,anchura,altura+4);
+                        ctx.rect(walls[_indexx].getX,walls[_indexx].getY,anchura,altura);
                 }
                 else{
                     if(!createFlag)
-                        walls[_indexx] = (new Wall(_x, _y,anchurav+2, alturav));
+                        walls[_indexx] = (new Wall(_x, _y,anchurav, alturav));
 
                     if(walls[_indexx].getX == 9999){
                         console.log(_indexx);
@@ -216,22 +217,22 @@
                 ctx.beginPath();
                 ctx.lineWidth = grosorLinea;
                 if(_orientacion == 1){
-                    ctx.moveTo(_x,_y);
-                    ctx.lineTo(_x+anchura,_y);
+                    ctx.moveTo(_x+gap,_y);
+                    ctx.lineTo(_x+anchura-gap,_y);
                 }else{
-                    ctx.moveTo(_x+anchurav,_y);
-                    ctx.lineTo(_x+anchurav,_y+alturav);
+                    ctx.moveTo(_x+anchurav,_y+gap);
+                    ctx.lineTo(_x+anchurav,_y+alturav-gap);
                 }
                 ctx.stroke();
 
                 ctx.beginPath();
                 ctx.strokeStyle = "blue";
                 if(_orientacion == 1){
-                    ctx.moveTo(_x,_y+altura);
-                    ctx.lineTo(_x+anchura,_y+altura);
+                    ctx.moveTo(_x+gap,_y+altura);
+                    ctx.lineTo(_x+anchura-gap,_y+altura);
                 }else{
-                    ctx.moveTo(_x,_y);
-                    ctx.lineTo(_x,_y+alturav);
+                    ctx.moveTo(_x,_y+gap);
+                    ctx.lineTo(_x,_y+alturav-gap);
                 }
                 ctx.stroke();
                 _indexx += 1;
@@ -267,19 +268,20 @@
                     if(i != 6 && i != 7){
                         cuerpoRectangulo(1175, 24 + (i*anchura),2,true);
                     }
-                }
+                }       
 
-                //centro
-                for(let i = 0; i<(700-anchura*2)/anchura; i++){
-                    cuerpoRectangulo(78, 124 + (i*anchura),2,false);
-                }
-                for(let i = 0; i<(700-anchura*2)/anchura; i++){
-                    if(i != 4 && i !=5)
-                        cuerpoRectangulo(142, 171 + (i*anchura),2,false);
-                }
-                for(let i = 0; i<(1220-anchura*2)/anchura; i++){
+                //Apertura en la parte de abajo
+                for(let i = 0; i<(200-anchura*2)/anchura; i++){
+                    
                     if(i != 11 && i != 10){
-                        cuerpoRectangulo(anchura + (i*anchura)-22,775,1,true);
+                        cuerpoRectangulo(anchura + (i*anchura)-22,200,1,true);
+                    }
+                }
+                //Pared vertical izquierda
+                for(let i = 0; i<(820-anchura*2)/anchura; i++){
+                    
+                    if(i != 6 && i != 7){
+                        cuerpoRectangulo(10, 24 + (i*anchura),2,true);
                     }
                 }
                 createFlag = true;
