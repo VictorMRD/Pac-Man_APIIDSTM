@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="Game.css">
+        <title>Pacman v0.2</title>
+    </head>
+    <body>
+        <canvas id="myCanvas" width="1200" height="800" style="border: 2px solid black"></canvas>
+        <script>
+            const canvas = document.getElementById("myCanvas");
+            const ctx = canvas.getContext("2d");    
+            // Fondo de Pantalla
+            function fondoNegro(){
+                ctx.beginPath();
+                ctx.fillStyle = "black";
+                ctx.rect(0,0,1200,800);
+                ctx.fill();
+            }
+
+            //Agregar detector de teclas 
+            let moveX = 0, moveY = 0, velocidad = 4; 
+            let collisionIndex, lastMovement;
+            document.addEventListener("keydown", (e) =>{
+                switch (e.keyCode) {
+                    case 87:
+                        direction = 90; // Up
+                        moveX = 0;
+                        moveY = -velocidad;
+                        lastMovement = 87;
+                        break;
+                    case 65:
+                        moveY = 0;
+                        moveX = -velocidad;
+                        direction = 180; // Left7
+                        lastMovement = 65;
+                        break;
+                    case 83:
+                        moveX = 0;
+                        moveY = velocidad;
+                        direction = 270; // Down
+                        lastMovement = 83;
+                        break;
+                    case 68:
+                        moveY = 0;
+                        moveX = velocidad;
+                        direction = 0; // Right
+                        lastMovement = 68;
+                        break;
+                    case 32:
+                        destruirMuro(collisionIndex);
+                        if(lastMovement == 68)
+                            moveX = velocidad;
+                        else if(lastMovement == 87)
+                            moveY = -velocidad;
+                        else if(lastMovement == 65)
+                            moveX = -velocidad;
+                        else
+                            moveY = velocidad;
+                        break;
+                }
+            })
+
+            //Clases
+            class DetectionParam{
+                constructor(_x,_y,_width,_height){
+                    this.x = _x;
+                    this.y = _y;
+                    this.width = _width;
+                    this.height = _height;
+                }
+                set setX(_x){
+                    this.x = _x;
+                }
+                get getX(){
+                    return this.x;
+                }
+                set setY(_y){
+                    this.y = _y;
+                }
+                get getY(){
+                    return this.y;
+                }
+                set setWidth(_width){
+                    this.width = _width;
+                }
+                get getWidth(){
+                    return this.width;
+                }
+                set setHeight(_height){
+                    this.height = _height;
+                }
+                get getHeight(){
+                    return this.height;
+                }
+                peroSiFunciona() {
+                    console.log("Hola");
+                }
+            }
+            class Player extends DetectionParam{
+                constructor(_x,_y,_width,_height, _rad){
+                    super(_x,_y,_width,_height);
+                    this.rad = _rad;
+                }
+                get getRad(){
+                    return this.rad;
+                }
+                set setRad(_rad){
+                    this.rad = _rad;
+                }
+            }
+            class Wall extends DetectionParam{
+                constructor(_x,_y,_width,_height){
+                    super(_x,_y,_width,_height);
+                }
+            }
+
+            //Creacion de objetos del mapa
+            let player = new Player(400,200,20,20,20);
+
+            //Graficos
+            //Variables del dibujado jugador/pacman
+            let radio = 20, x = 0, y = 0;
+            let iterator = 0;
+            let mouthAngle = 0; // Initial mouth angle
+            let bocaFlag = false;             
+            let direction = null;
+
+            //Animación y movimiento del pacman
+            function animacionPacman() {
+                //Caja de pacman
+                // ctx.fillStyle = "red";
+                // ctx.beginPath();
+                // ctx.rect(player.getX, player.getY,player.getWidth*2,player.getHeight*2);
+                // ctx.fill();
+
+                //Circulo de pacman
+                ctx.beginPath();
+                x = player.getX + player.getRad;
+                y = player.getY + player.getRad;
+                ctx.moveTo(x, y);
+
+                //Angulo de la boca
+                const mouthRadians = (mouthAngle * Math.PI) / 260;
+
+                let startAngle, endAngle;
+
+                if (direction === 90) { // Arriba
+                    startAngle = (Math.PI * 1.5) + (mouthRadians / 2);
+                    endAngle = (Math.PI * 1.5) - (mouthRadians / 2);
+                } else if (direction === 270) { // Abajo
+                    startAngle = (Math.PI * 0.5) + (mouthRadians / 2);
+                    endAngle = (Math.PI * 0.5) - (mouthRadians / 2);
+                } else { // Izquierda - Derecha
+                    startAngle = (mouthRadians / 2) + (direction * Math.PI) / 180;
+                    endAngle = (2 * Math.PI) - ((mouthRadians / 2) + (direction * Math.PI) / 180);
+                }
+
+                //Boca
+                ctx.arc(x, y, player.getRad, startAngle, endAngle); 
+                ctx.lineTo(x, y); 
+                ctx.fillStyle = "yellow"; 
+                ctx.fill();
+
+                //Abrir o cerrar la boca
+                if (!bocaFlag) {
+                    mouthAngle += 10;
+                    if (mouthAngle >= 90) {
+                        bocaFlag = true;
+                    }
+                } else {
+                    mouthAngle -= 10;
+                    if (mouthAngle <= 0) {
+                        bocaFlag = false;
+                    }
+                }
+                
+                //Mover al jugador
+                player.x += moveX;
+                player.y += moveY;
+            }
+
+            //Variables para dibujar secciones de pared
+            let altura = 14, anchura = 50, alturav = 50, anchurav = 14, grosorLinea = 8, walls = [];
+            let createFlag = false;
+            let _indexx = 0;
+            function cuerpoRectangulo(_x,_y,_orientacion,_agujero){
+                ctx.beginPath();
+                ctx.fillStyle = "yellow";
+                if(_orientacion == 1){
+                    if(!createFlag)
+                        walls[_indexx] = (new Wall(_x,_y,anchura,altura+4));
+                    
+                    if(walls[_indexx].getX == 9999){
+                        _indexx++;
+                        return;
+                    }else 
+                        ctx.rect(walls[_indexx].getX,walls[_indexx].getY,anchura,altura+4);
+                }
+                else{
+                    if(!createFlag)
+                        walls[_indexx] = (new Wall(_x, _y,anchurav+2, alturav));
+
+                    if(walls[_indexx].getX == 9999){
+                        console.log(_indexx);
+                        console.log(walls[_indexx].getX);
+                        _indexx++;
+                        return;
+                    }else 
+                        ctx.rect(walls[_indexx].getX,walls[_indexx].getY,anchurav,alturav);
+                       
+                }
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.lineWidth = grosorLinea;
+                if(_orientacion == 1){
+                    ctx.moveTo(_x,_y);
+                    ctx.lineTo(_x+anchura,_y);
+                }else{
+                    ctx.moveTo(_x+anchurav,_y);
+                    ctx.lineTo(_x+anchurav,_y+alturav);
+                }
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.strokeStyle = "blue";
+                if(_orientacion == 1){
+                    ctx.moveTo(_x,_y+altura);
+                    ctx.lineTo(_x+anchura,_y+altura);
+                }else{
+                    ctx.moveTo(_x,_y);
+                    ctx.lineTo(_x,_y+alturav);
+                }
+                ctx.stroke();
+                _indexx += 1;
+            }   
+
+            //Cambiar a crear muros
+            function dibujarEscenario(){
+                _indexx = 0;
+
+                //Apertura en la pared de arriba
+                for(let i = 0; i<(1220-anchura*2)/anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(anchura + (i*anchura)-22,10,1,true);
+                    }
+                }
+                //Apertura en la parte de abajo
+                for(let i = 0; i<(1220-anchura*2)/anchura; i++){
+                    
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(anchura + (i*anchura)-22,775,1,true);
+                    }
+                }
+                //Pared vertical izquierda
+                for(let i = 0; i<(820-anchura*2)/anchura; i++){
+                    
+                    if(i != 6 && i != 7){
+                        cuerpoRectangulo(10, 24 + (i*anchura),2,true);
+                    }
+                }
+                //Pared vertical derecha
+                for(let i = 0; i<(820-anchura*2)/anchura; i++){
+                    
+                    if(i != 6 && i != 7){
+                        cuerpoRectangulo(1175, 24 + (i*anchura),2,true);
+                    }
+                }
+
+                //centro
+                for(let i = 0; i<(700-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(78, 124 + (i*anchura),2,false);
+                }
+                for(let i = 0; i<(700-anchura*2)/anchura; i++){
+                    if(i != 4 && i !=5)
+                        cuerpoRectangulo(142, 171 + (i*anchura),2,false);
+                }
+                for(let i = 0; i<(1220-anchura*2)/anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(anchura + (i*anchura)-22,775,1,true);
+                    }
+                }
+                createFlag = true;
+            }
+            function cambioDeLugarMapa(_player){
+                if(_player.getY + _player.getHeight < 0)
+                    _player.y = 790
+                if(_player.getY > 790)
+                    _player.y = 0;
+                if(_player.getX + _player.getWidth < -20)
+                    _player.x = 1200
+                if(_player.getX > 1200)
+                    _player.x = -20;
+            }
+            function detectorColisiones(_player){
+                for (let index = 0; index < walls.length; index++) {
+                    if(_player.getX < walls[index].getX + walls[index].getWidth && _player.getX + _player.getWidth*2 > walls[index].getX
+                    && _player.getY < walls[index].getY + walls[index].getHeight && _player.getY + _player.getHeight*2 > walls[index].getY){
+                        collisionIndex = index;
+                        if (direction === 90) { // Arriba
+                            player.y +=5;
+                        } else if (direction === 270) { // Abajo
+                            player.y -=5;
+                        } else if(direction == 180){ // Izquierda 
+                            player.x +=5;
+                        }else { // Derecha
+                            player.x -=5;
+                        }
+                        moveX = 0;
+                        moveY = 0;
+                    }   
+                }
+            }
+            
+            //Destruir Muro en colision
+            function destruirMuro(_index){
+                walls[_index].x = 9999;
+            }
+
+            var ultimoCuadro = 0, fps = 60; 
+            function Animacion() {
+                var ahora = Date.now();
+                var tiempoTranscurrido = ahora - ultimoCuadro;
+                var intervaloCuadro = 1000 / fps; 
+
+                if (tiempoTranscurrido > intervaloCuadro) {
+                    ultimoCuadro = ahora - (tiempoTranscurrido % intervaloCuadro);
+                    cambioDeLugarMapa(player);
+                    fondoNegro();
+                    dibujarEscenario();
+                    animacionPacman();
+                    detectorColisiones(player);
+                }
+
+                window.requestAnimationFrame(Animacion);
+            }
+            Animacion();
+        </script>
+    </body>
+</html>
