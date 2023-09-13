@@ -8,9 +8,11 @@
     </head>
     <body>
         <canvas id="myCanvas" width="1200" height="800" style="border: 2px solid black"></canvas>
+        <img id="fanstasmaRojo" src="./img/fantasma_rojo.png" width="45px">
         <script>
             const canvas = document.getElementById("myCanvas");
             const ctx = canvas.getContext("2d");    
+            const img = document.getElementById("fanstasmaRojo"); 
             // Fondo de Pantalla
             function fondoNegro(){
                 ctx.beginPath();
@@ -22,6 +24,7 @@
             //Agregar detector de teclas 
             let moveX = 0, moveY = 0, velocidad = 4; 
             let collisionIndex, lastMovement;
+            let moverse = 890;
             document.addEventListener("keydown", (e) =>{
                 switch (e.keyCode) {
                     case 87:
@@ -110,6 +113,13 @@
                     this.rad = _rad;
                 }
             }
+            class Enemy extends DetectionParam{
+                constructor(_x,_y,_width, _img, _movementx, _movementy){
+                    super(_x,_y,_width,_width);
+                }
+            }
+            let enemies = [new Enemy(100,20,50,img,Math.round(Math.random()),0)];
+
             class Wall extends DetectionParam{
                 constructor(_x,_y,_width,_height){
                     super(_x,_y,_width,_height);
@@ -188,7 +198,7 @@
             let _indexx = 0;
             function cuerpoRectangulo(_x,_y,_orientacion,_agujero){
                 ctx.beginPath();
-                ctx.fillStyle = "yellowaa";
+                ctx.fillStyle = "yellow";
                 if(_orientacion == 1){
                     if(!createFlag)
                         walls[_indexx] = (new Wall(_x,_y,anchura,altura));
@@ -197,7 +207,7 @@
                         _indexx++;
                         return;
                     }else 
-                        ctx.rect(walls[_indexx].getX,walls[_indexx].getY,anchura,altura);
+                        ctx.rect(walls[_indexx].getX+7,walls[_indexx].getY,anchura-15,altura);
                 }
                 else{
                     if(!createFlag)
@@ -209,7 +219,7 @@
                         _indexx++;
                         return;
                     }else 
-                        ctx.rect(walls[_indexx].getX,walls[_indexx].getY,anchurav,alturav);
+                        ctx.rect(walls[_indexx].getX,walls[_indexx].getY+7,anchurav,alturav-15);
                        
                 }
                 ctx.fill();
@@ -241,74 +251,274 @@
             //Cambiar a crear muros
             function dibujarEscenario(){
                 _indexx = 0;
-
                 //Apertura en la pared de arriba
                 for(let i = 0; i<(1220-anchura*2)/anchura; i++){
-                    if(i != 11 && i != 10){
-                        cuerpoRectangulo(anchura + (i*anchura)-22,10,1,true);
-                    }
+                    cuerpoRectangulo(anchura + (i*anchura)-22,10,1,true);
                 }
                 //Apertura en la parte de abajo
                 for(let i = 0; i<(1220-anchura*2)/anchura; i++){
-                    
-                    if(i != 11 && i != 10){
-                        cuerpoRectangulo(anchura + (i*anchura)-22,775,1,true);
-                    }
+                    cuerpoRectangulo(anchura + (i*anchura)-22,775,1,true);
                 }
                 //Pared vertical izquierda
                 for(let i = 0; i<(820-anchura*2)/anchura; i++){
-                    
-                    if(i != 6 && i != 7){
+                    if(i != 6 && i != 7 && i != 5 && i != 8 && i != 4 && i != 3 && i != 9){
                         cuerpoRectangulo(10, 24 + (i*anchura),2,true);
                     }
                 }
-                //Pared vertical derecha
-                for(let i = 0; i<(820-anchura*2)/anchura; i++){
-                    
-                    if(i != 6 && i != 7){
-                        cuerpoRectangulo(1175, 24 + (i*anchura),2,true);
+                //boca de la pared izquierda arriba
+                for(let i = 0; i<(300-anchura*2)/anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(anchura + (i*anchura)-79,298,1,true);
                     }
-                }       
-
-                //Apertura en la parte de abajo
-                for(let i = 0; i<(200-anchura*2)/anchura; i++){
-                    
+                }
+                for(let i = 0; i<(240-anchura*2)/anchura; i++){
                     if(i != 11 && i != 10){
                         cuerpoRectangulo(anchura + (i*anchura)-22,200,1,true);
                     }
                 }
-                //Pared vertical izquierda
-                for(let i = 0; i<(820-anchura*2)/anchura; i++){
-                    
-                    if(i != 6 && i != 7){
-                        cuerpoRectangulo(10, 24 + (i*anchura),2,true);
+                //boca de la pared izquierda abajo
+                for(let i = 0; i<(300-anchura*2)/anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(anchura + (i*anchura)-79,490,1,true);
                     }
                 }
+                for(let i = 0; i<(280-anchura*2)/anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(anchura + (i*anchura)-22,585,1,true);
+                    }
+                }
+                //tapa de la boca izquierda
+                for(let i = 3; i<(820-anchura*2)/anchura; i++){
+                    if(i != 6 && i != 7 && i != 5 && i != 11 && i != 12 && i != 10 && i != 11){
+                        cuerpoRectangulo(216, 24 + (i*anchura),2,true);
+                    }
+                }       
+                //Pared vertical derecha
+                for(let i = 0; i<(820-anchura*2)/anchura; i++){
+                    if(i != 6 && i != 7 && i != 8  && i != 9  && i != 5  && i != 4  && i != 3){
+                        cuerpoRectangulo(1175, 24 + (i*anchura),2,true);
+                    }
+                }    
+                //boca de la pared derecha arriba
+                let moverBocaDerecha = 330;
+                for(let i = 0; i < (300 - anchura * 2) / anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(790 + moverBocaDerecha - 30 - (i * anchura) + 79, 298, 1, true);
+                    }
+                }
+                for(let i = 0; i < (240 - anchura * 2) / anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(758+ moverBocaDerecha - (i * anchura) + 22, 200, 1, true);
+                    }
+                }
+                //boca de la pared derecha abajo
+                for(let i = 0; i < (300 - anchura * 2) / anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(790+ moverBocaDerecha - 30 - (i * anchura) + 79, 490, 1, true);
+                    }
+                }
+                for(let i = 0; i < (280 - anchura * 2) / anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(758+ moverBocaDerecha- (i * anchura) + 22, 585, 1, true);
+                    }
+                }
+                //tapa de la boca derecha
+                for(let i = 3; i < (820 - anchura * 2) / anchura; i++){
+                    if(i != 6 && i != 7 && i != 5 && i != 11 && i != 12 && i != 10 && i != 11){
+                        cuerpoRectangulo(975, 24 + (i * anchura), 2, true);
+                    }
+                }
+                //Mini pared de abajo a la izquierda
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + (i*anchura)-22,715,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                        cuerpoRectangulo(75, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                        cuerpoRectangulo(216, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + (i*anchura)-22,660,1,true);
+                }
+                //Mini pared de abajo a la derecha
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + moverse + (i*anchura)-22,715,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                        cuerpoRectangulo(75 + moverse, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                        cuerpoRectangulo(216 + moverse, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + moverse + (i*anchura)-22,660,1,true);
+                }
+                
+                //Mini pared de arriba a la izquierda
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + (i*anchura)-22,135   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + (i*anchura)-22,75   ,1,true);
+                }
+
+                //Mini pared arriba a la derecha
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + moverse + (i*anchura)-22,135   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75+ moverse, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216+ moverse, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura+ moverse + (i*anchura)-22,75   ,1,true);
+                }
+
+                //Mini pared arriba a la derecha
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 250 + (i*anchura)-22,135   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75 + 250, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216 + 308, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 250 + (i*anchura)-22,75   ,1,true);
+                }
+
+                //Mini pared arriba a la derecha
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 250 + (i*anchura)-22, 715   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75 + 250, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216 + 308, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 250 + (i*anchura)-22,660   ,1,true);
+                }
+                //Mini pared arriba a la derecha
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 590 + (i*anchura)-22, 715   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75 + 590, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216 + 648, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 590 + (i*anchura)-22,660   ,1,true);
+                }
+
+                //Mini pared arriba a la derecha
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 590 + (i*anchura)-22, 135   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75 + 590, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216 + 648, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 590 + (i*anchura)-22,75,1,true);
+                }
+                for(let i = 0; i<(300-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(595, 30 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(300-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(595, 537 + (i*anchura),2,true);
+                }
+
+                //division tipo T izquierda
+                for(let i = 0; i<(500-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(300, 200 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(500-anchura*2)/anchura; i++){
+                    if(i != 3 && i != 2 && i != 4)
+                        cuerpoRectangulo(440, 200 + (i*anchura),2,true);
+                }
+                for(let i = 1; i<(280-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 340 + (i*anchura)-22,320,1,true);
+                }   
+                for(let i = 1; i<(280-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 340 + (i*anchura)-22,472,1,true);
+                }   
+                for(let i = 1; i<(280-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 225 + (i*anchura)-22,200,1,true);
+                }
+                for(let i = 1; i<(280-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 225 + (i*anchura)-22,593,1,true);
+                }
+                for(let i = 2; i<(400-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(555, 200 + (i*anchura),2,true);
+                }   
+
+                //division tipo T derecha
+                let moverT = 580;
+                for(let i = 0; i < (500 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(310 + moverT, 200 + (i * anchura), 2, true);
+                }
+                for(let i = 0; i < (500 - anchura * 2) / anchura; i++){
+                    if(i != 3 && i != 2 && i != 4)
+                        cuerpoRectangulo(170 + moverT, 200 + (i * anchura), 2, true);
+                }
+                for(let i = 1; i < (280 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(anchura + moverT + 110 - (i * anchura) + 22, 320, 1, true);
+                }
+                for(let i = 1; i < (280 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(anchura + moverT + 110 - (i * anchura) + 22, 472, 1, true);
+                }
+                for(let i = 1; i < (280 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(anchura + moverT + 225 - (i * anchura) + 22, 200, 1, true);
+                }
+                for(let i = 1; i < (280 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(anchura + moverT + 225 - (i * anchura) + 22, 593, 1, true);
+                }
+                for(let i = 2; i < (400 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(60 + moverT, 200 + (i * anchura), 2, true);
+                }
+
+                
                 createFlag = true;
             }
             function cambioDeLugarMapa(_player){
                 if(_player.getY + _player.getHeight < 0)
-                    _player.y = 790
-                if(_player.getY > 790)
-                    _player.y = 0;
-                if(_player.getX + _player.getWidth < -20)
-                    _player.x = 1200
-                if(_player.getX > 1200)
-                    _player.x = -20;
+                    _player.y = 780;
+                if(_player.getY > 780)
+                    _player.y = 5;
+                if(_player.getX + _player.getWidth < 0)
+                    _player.x = 1170;
+                if(_player.getX > 1170)
+                    _player.x = 0;
             }
             function detectorColisiones(_player){
                 for (let index = 0; index < walls.length; index++) {
-                    if(_player.getX < walls[index].getX + walls[index].getWidth && _player.getX + _player.getWidth*2 > walls[index].getX
-                    && _player.getY < walls[index].getY + walls[index].getHeight && _player.getY + _player.getHeight*2 > walls[index].getY){
+                    if(_player.getX + 10 < walls[index].getX + walls[index].getWidth && _player.getX + _player.getWidth*2 -10 > walls[index].getX
+                    && _player.getY + 10 < walls[index].getY + walls[index].getHeight && _player.getY + _player.getHeight*2 -10> walls[index].getY){
                         collisionIndex = index;
                         if (direction === 90) { // Arriba
-                            player.y +=5;
+                            player.y +=10;
                         } else if (direction === 270) { // Abajo
-                            player.y -=5;
+                            player.y -=10;
                         } else if(direction == 180){ // Izquierda 
-                            player.x +=5;
+                            player.x +=10;
                         }else { // Derecha
-                            player.x -=5;
+                            player.x -=10;
                         }
                         moveX = 0;
                         moveY = 0;
