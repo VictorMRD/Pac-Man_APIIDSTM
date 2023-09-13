@@ -13,6 +13,7 @@
             const canvas = document.getElementById("myCanvas");
             const ctx = canvas.getContext("2d");    
             const img = document.getElementById("fanstasmaRojo"); 
+		    let enemyspeed = 2;
             // Fondo de Pantalla
             function fondoNegro(){
                 ctx.beginPath();
@@ -22,6 +23,7 @@
             }
 
             //Agregar detector de teclas 
+            let tiempo = 0;
             let moveX = 0, moveY = 0, velocidad = 4; 
             let collisionIndex, lastMovement;
             let moverse = 890;
@@ -97,9 +99,6 @@
                 get getHeight(){
                     return this.height;
                 }
-                peroSiFunciona() {
-                    console.log("Hola");
-                }
             }
             class Player extends DetectionParam{
                 constructor(_x,_y,_width,_height, _rad){
@@ -116,10 +115,52 @@
             class Enemy extends DetectionParam{
                 constructor(_x,_y,_width, _img, _movementx, _movementy){
                     super(_x,_y,_width,_width);
+                    this.img = _img;
+                    this.movementx = _movementx;
+                    this.movementy = _movementy;
+                }
+
+                set setImg(_img){
+                    this.img = _img;
+                }
+                
+                get getImg(){
+                    return this.img;
+                }
+
+                set setMovementx(_movementx){
+				    this.movementx = _movementx;
+                }
+
+                get getMovementx() {
+                    return this.movementx;
+                }
+
+                set setMovementy(_movementy){
+                    this.movementy = _movementy;
+                }
+
+                get getMovementy() {
+                    return this.movementy;
                 }
             }
-            let enemies = [new Enemy(100,20,50,img,Math.round(Math.random()),0)];
-
+            let enemies = [new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),
+            new Enemy(580,380,40,img,Math.round(Math.random()),0),];
             class Wall extends DetectionParam{
                 constructor(_x,_y,_width,_height){
                     super(_x,_y,_width,_height);
@@ -198,7 +239,7 @@
             let _indexx = 0;
             function cuerpoRectangulo(_x,_y,_orientacion,_agujero){
                 ctx.beginPath();
-                ctx.fillStyle = "yellow";
+                ctx.fillStyle = "black";
                 if(_orientacion == 1){
                     if(!createFlag)
                         walls[_indexx] = (new Wall(_x,_y,anchura,altura));
@@ -214,8 +255,6 @@
                         walls[_indexx] = (new Wall(_x, _y,anchurav, alturav));
 
                     if(walls[_indexx].getX == 9999){
-                        console.log(_indexx);
-                        console.log(walls[_indexx].getX);
                         _indexx++;
                         return;
                     }else 
@@ -524,6 +563,25 @@
                         moveY = 0;
                     }   
                 }
+                for(let findex = 0; findex < walls.length; findex++){
+					for(let sindex = 0; sindex < enemies.length; sindex++){
+						if(enemies[sindex].getX < walls[findex].getX + walls[findex].getWidth &&  enemies[sindex].getX + enemies[sindex].getWidth > walls[findex].getX && 
+						enemies[sindex].getY < walls[findex].getY + walls[findex].getHeight &&  enemies[sindex].getY + enemies[sindex].getWidth > walls[findex].getY){	
+							tocarBorde(enemies[sindex]);
+						}		
+						//CAMBIO ALEATORIO DE DIRECCIÓN CON BORDE
+						if(enemies[sindex].getX <= 0){
+							tocarBorde(enemies[sindex]);
+						}else if(enemies[sindex].getX >= 1470 - enemies[sindex].getWidth){
+							tocarBorde(enemies[sindex]);
+						}else if(enemies[sindex].getY <= 0){
+							tocarBorde(enemies[sindex]);
+						}else if(enemies[sindex].getY >= 800 - enemies[sindex].getWidth){
+							tocarBorde(enemies[sindex]);
+						}
+
+					}   
+				}
             }
             
             //Destruir Muro en colision
@@ -531,6 +589,147 @@
                 walls[_index].x = 9999;
             }
 
+            function movimientoEnemigos(){
+                for(let findex = 0; findex < enemies.length; findex++){
+                    
+                    if(enemies[findex].movementx == 1){
+                        enemies[findex].x +=enemyspeed;
+                    }else if(enemies[findex].movementx == 0){
+                        enemies[findex].x -=enemyspeed;
+                    }else if(enemies[findex].movementy == 0){
+                        enemies[findex].y -=enemyspeed;
+                    }else if(enemies[findex].movementy == 1){
+                        enemies[findex].y +=enemyspeed;
+                    }
+                    ctx.drawImage(enemies[findex].img, enemies[findex].getX, enemies[findex].getY, enemies[findex].getWidth, enemies[findex].getWidth);
+                }
+            }
+            function cambio(){
+                if(Math.round(Math.random()) == 1){
+                    flag2 = true;
+                }else
+                    flag2 = false;
+                return flag2;
+            }
+
+            let cambiores;
+            function tocarBorde(changolion){
+                if(changolion.movementx == 0){
+                    changolion.x += 5;
+                    if(cambio()){
+                        cambiores = cambio();
+                        while(true){
+                            if(cambiores && changolion.movementx == 1)
+                                cambiores = cambio();
+                            else if(!cambiores && changolion.movementx == 0)
+                                cambiores = cambio();
+                            else
+                                break;
+                        }
+                        changolion.movementy = 3;
+                        changolion.movementx = cambiores ? 1 : 0;
+                    }else{
+                        cambiores = cambio();
+                        while(true){
+                            if(cambiores && changolion.movementy == 1)
+                                cambiores = cambio();
+                            else if(!cambiores && changolion.movementy == 0)
+                                cambiores = cambio();
+                            else
+                                break;
+                        }
+                        changolion.movementx = 3;
+                        changolion.movementy = cambiores ? 1 : 0;
+                    }
+                }else if(changolion.movementx == 1){
+                    changolion.x -= 5;
+                    if(cambio()){
+                        cambiores = cambio();
+                        while(true){
+                            if(cambiores && changolion.movementx == 1)
+                                cambiores = cambio();
+                            else if(!cambiores && changolion.movementx == 0)
+                                cambiores = cambio();
+                            else
+                                break;
+                        }
+                        changolion.movementy = 3;
+                        changolion.movementx = cambiores ? 1 : 0;
+                    }else{
+                        cambiores = cambio();
+                        while(true){
+                            if(cambiores && changolion.movementy == 1)
+                                cambiores = cambio();
+                            else if(!cambiores && changolion.movementy == 0)
+                                cambiores = cambio();
+                            else
+                                break;
+                        }
+                        changolion.movementx = 3;
+                        changolion.movementy = cambiores ? 1 : 0;
+                    }
+                }else if(changolion.movementy == 1){
+                    changolion.y -= 5;
+                    if(cambio()){
+                        cambiores = cambio();
+                        while(true){
+                            if(cambiores && changolion.movementx == 1)
+                                cambiores = cambio();
+                            else if(!cambiores && changolion.movementx == 0)
+                                cambiores = cambio();
+                            else
+                                break;
+                        }
+                        changolion.movementy = 3;
+                        changolion.movementx = cambiores ? 1 : 0;
+                    }else{
+                        cambiores = cambio();
+                        while(true){
+                            if(cambiores && changolion.movementy == 1)
+                                cambiores = cambio();
+                            else if(!cambiores && changolion.movementy == 0)
+                                cambiores = cambio();
+                            else
+                                break;
+                        }
+                        changolion.movementx = 3;
+                        changolion.movementy = cambiores ? 1 : 0;
+                    }
+                }else if(changolion.movementy == 0){
+                    changolion.y += 5;
+                    if(cambio()){
+                        cambiores = cambio();
+                        while(true){
+                            if(cambiores && changolion.movementy == 1)
+                                cambiores = cambio();
+                            else if(!cambiores && changolion.movementy == 0)
+                                cambiores = cambio();
+                            else
+                                break;
+                        }
+                        changolion.movementy = 3;
+                        changolion.movementx = cambiores ? 1 : 0;
+                    }else{
+                        cambiores = cambio();
+                        while(true){
+                            if(cambiores && changolion.movementy == 1)
+                                cambiores = cambio();
+                            else if(!cambiores && changolion.movementy == 0)
+                                cambiores = cambio();
+                            else
+                                break;
+                        }
+                        changolion.movementx = 3;
+                        changolion.movementy = cambiores ? 1 : 0;
+                    }
+                }
+            }
+            function enemigos(){
+                movimientoEnemigos();
+
+            }
+
+            let contadorr = 0;
             var ultimoCuadro = 0, fps = 60; 
             function Animacion() {
                 var ahora = Date.now();
@@ -541,11 +740,20 @@
                     ultimoCuadro = ahora - (tiempoTranscurrido % intervaloCuadro);
                     cambioDeLugarMapa(player);
                     fondoNegro();
+                    enemigos();
                     dibujarEscenario();
                     animacionPacman();
                     detectorColisiones(player);
+                    contadorr++;
+                    if(contadorr>320){
+                        for(let findex = 0; findex < enemies.length/2; findex++){
+                            tocarBorde(enemies[Math.floor(Math.random() * (enemies.length - 0 + 0) + 0)]);
+                        }
+                        tiempo++;
+                        contadorr = 0;
+                        console.log("TIEMPO: "+tiempo);
+                    }
                 }
-
                 window.requestAnimationFrame(Animacion);
             }
             Animacion();
