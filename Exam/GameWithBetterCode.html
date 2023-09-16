@@ -143,32 +143,37 @@
                 get getMovementy() {
                     return this.movementy;
                 }
+
+                set setSecondOption(_secondOption){
+                    this.secondOption = _secondOption;
+                }
+
+                get getSecondOption() {
+                    return this.secondOption;
+                }
+
+                set setNotTheSameWall(_notTheSameWall){
+                    this.notTheSameWall = _notTheSameWall;
+                }
+
+                get getNotTheSameWall() {
+                    return this.notTheSameWall;
+                }
             }
-            let enemies = [new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),
-            new Enemy(580,380,40,img,Math.round(Math.random()),0),];
             class Wall extends DetectionParam{
                 constructor(_x,_y,_width,_height){
                     super(_x,_y,_width,_height);
                 }
             }
+            class Change extends DetectionParam{
+                constructor(_x,_y,_width,_height){
+                    super(_x,_y,_width,_height);
+                }
+            }
+            let changewalls = [];
 
             //Creacion de objetos del mapa
-            let player = new Player(400,200,20,20,20);
+            let player = new Player(700,270,20,20,20);
 
             //Graficos
             //Variables del dibujado jugador/pacman
@@ -288,7 +293,60 @@
             }   
 
             //Cambiar a crear muros
+            let changeWallsHeight = 10;
+            let changeWallsWidth = 12;
+            changewalls = [
+                            new Change(580,270,changeWallsWidth,changeWallsHeight),
+                            new Change(560,270,changeWallsWidth,changeWallsHeight),
+                            new Change(620,270,changeWallsWidth,changeWallsHeight),
+                           new Change(470,270,changeWallsWidth,changeWallsHeight),
+                           new Change(470,160,changeWallsWidth,changeWallsHeight),
+                           new Change(556,160,changeWallsWidth,changeWallsHeight),
+                           new Change(550,40,changeWallsWidth,changeWallsHeight),
+                           new Change(250,160,changeWallsWidth,changeWallsHeight),
+                           new Change(30,160,changeWallsWidth,changeWallsHeight),
+                           new Change(30,40,changeWallsWidth,changeWallsHeight),
+                           new Change(250,40,changeWallsWidth,changeWallsHeight),
+                           new Change(250,400,changeWallsWidth,changeWallsHeight),
+                           new Change(250,618,changeWallsWidth,changeWallsHeight),
+                           new Change(30,618,changeWallsWidth,changeWallsHeight),
+                           new Change(30,738,changeWallsWidth,changeWallsHeight),
+                           new Change(250,738,changeWallsWidth,changeWallsHeight),
+                           new Change(545,738,changeWallsWidth,changeWallsHeight),
+                           new Change(545,618,changeWallsWidth,changeWallsHeight),
+                           new Change(470,618,changeWallsWidth,changeWallsHeight),
+                           new Change(470,505,changeWallsWidth,changeWallsHeight),
+                           new Change(580,505,changeWallsWidth,changeWallsHeight), 
+                           new Change(555,505,changeWallsWidth,changeWallsHeight), 
+                           new Change(620,505,changeWallsWidth,changeWallsHeight), 
+                           new Change(580,400,changeWallsWidth,changeWallsHeight), 
+                           
+                            new Change(1170 - 470, 270, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 470, 160, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 556, 160, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 550, 40, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 250, 160, changeWallsWidth, changeWallsHeight),
+                            new Change(1150 - 15, 160, changeWallsWidth, changeWallsHeight),
+                            new Change(1150 - 15, 40, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 250, 40, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 250, 400, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 250, 618, changeWallsWidth, changeWallsHeight),
+                            new Change(1150 - 30, 618, changeWallsWidth, changeWallsHeight),
+                            new Change(1150 - 30, 738, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 250, 738, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 545, 738, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 545, 618, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 470, 618, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 470, 505, changeWallsWidth, changeWallsHeight),
+                        ];
             function dibujarEscenario(){
+                //Dibujar zonas de cambio
+                for (let index = 0; index < changewalls.length; index++) {
+                    ctx.beginPath();
+                    ctx.fillStyle = "yellow";
+                    ctx.rect(changewalls[index].getX, changewalls[index].getY, changewalls[index].getWidth, changewalls[index].getHeight);
+                }
+                
                 _indexx = 0;
                 //Apertura en la pared de arriba
                 for(let i = 0; i<(1220-anchura*2)/anchura; i++){
@@ -393,7 +451,6 @@
                 for(let i = 1; i<(240-anchura*2)/anchura; i++){
                     cuerpoRectangulo(anchura + moverse + (i*anchura)-22,660,1,true);
                 }
-                
                 //Mini pared de arriba a la izquierda
                 for(let i = 1; i<(240-anchura*2)/anchura; i++){
                     cuerpoRectangulo(anchura + (i*anchura)-22,135   ,1,true);
@@ -407,7 +464,6 @@
                 for(let i = 1; i<(240-anchura*2)/anchura; i++){
                     cuerpoRectangulo(anchura + (i*anchura)-22,75   ,1,true);
                 }
-
                 //Mini pared arriba a la derecha
                 for(let i = 1; i<(240-anchura*2)/anchura; i++){
                     cuerpoRectangulo(anchura + moverse + (i*anchura)-22,135   ,1,true);
@@ -421,7 +477,6 @@
                 for(let i = 1; i<(240-anchura*2)/anchura; i++){
                     cuerpoRectangulo(anchura+ moverse + (i*anchura)-22,75   ,1,true);
                 }
-
                 //Mini pared arriba a la derecha
                 for(let i = 1; i<(320-anchura*2)/anchura; i++){
                     cuerpoRectangulo(anchura + 250 + (i*anchura)-22,135   ,1,true);
@@ -435,7 +490,6 @@
                 for(let i = 1; i<(320-anchura*2)/anchura; i++){
                     cuerpoRectangulo(anchura + 250 + (i*anchura)-22,75   ,1,true);
                 }
-
                 //Mini pared arriba a la derecha
                 for(let i = 1; i<(320-anchura*2)/anchura; i++){
                     cuerpoRectangulo(anchura + 250 + (i*anchura)-22, 715   ,1,true);
@@ -462,7 +516,6 @@
                 for(let i = 1; i<(320-anchura*2)/anchura; i++){
                     cuerpoRectangulo(anchura + 590 + (i*anchura)-22,660   ,1,true);
                 }
-
                 //Mini pared arriba a la derecha
                 for(let i = 1; i<(320-anchura*2)/anchura; i++){
                     cuerpoRectangulo(anchura + 590 + (i*anchura)-22, 135   ,1,true);
@@ -482,7 +535,6 @@
                 for(let i = 0; i<(300-anchura*2)/anchura; i++){
                     cuerpoRectangulo(595, 537 + (i*anchura),2,true);
                 }
-
                 //division tipo T izquierda
                 for(let i = 0; i<(500-anchura*2)/anchura; i++){
                     cuerpoRectangulo(300, 200 + (i*anchura),2,true);
@@ -506,7 +558,6 @@
                 for(let i = 2; i<(400-anchura*2)/anchura; i++){
                     cuerpoRectangulo(555, 200 + (i*anchura),2,true);
                 }   
-
                 //division tipo T derecha
                 let moverT = 580;
                 for(let i = 0; i < (500 - anchura * 2) / anchura; i++){
@@ -531,8 +582,6 @@
                 for(let i = 2; i < (400 - anchura * 2) / anchura; i++){
                     cuerpoRectangulo(60 + moverT, 200 + (i * anchura), 2, true);
                 }
-
-                
                 createFlag = true;
             }
             function cambioDeLugarMapa(_player){
@@ -546,40 +595,93 @@
                     _player.x = 0;
             }
             function detectorColisiones(_player){
-                for (let index = 0; index < walls.length; index++) {
-                    if(_player.getX + 10 < walls[index].getX + walls[index].getWidth && _player.getX + _player.getWidth*2 -10 > walls[index].getX
-                    && _player.getY + 10 < walls[index].getY + walls[index].getHeight && _player.getY + _player.getHeight*2 -10> walls[index].getY){
-                        collisionIndex = index;
-                        if (direction === 90) { // Arriba
-                            player.y +=10;
-                        } else if (direction === 270) { // Abajo
-                            player.y -=10;
-                        } else if(direction == 180){ // Izquierda 
-                            player.x +=10;
-                        }else { // Derecha
-                            player.x -=10;
+                //detector de colisiones del jugador contra los muros
+                colisionesDelJugador(_player, walls,false,true,false);
+                colisionesDelJugador(_player, enemies,true,false,false);
+
+                asignacionDeMuro(normalEnemies,false);
+                asignacionDeMuro(enemies,true);
+
+                detectorColisionesEnemigosMuros(normalEnemies);
+                detectorColisionesEnemigosMuros(enemies);
+                
+            }
+            function colisionesDelJugador(_player,arregloDeObjetos, enemigos, muros, frutas){
+                for (let index = 0; index < arregloDeObjetos.length; index++) {
+                    if(_player.getX + 10 < arregloDeObjetos[index].getX + arregloDeObjetos[index].getWidth && _player.getX + _player.getWidth*2 -10 > arregloDeObjetos[index].getX
+                    && _player.getY + 10 < arregloDeObjetos[index].getY + arregloDeObjetos[index].getHeight && _player.getY + _player.getHeight*2 -10> arregloDeObjetos[index].getY){
+                        if(enemies){
+                            //alert("Te toque");
                         }
-                        moveX = 0;
-                        moveY = 0;
+                        if(muros){
+                            collisionIndex = index;
+                            if (direction === 90) { // Arriba
+                                player.y +=10;
+                            } else if (direction === 270) { // Abajo
+                                player.y -=10;
+                            } else if(direction == 180){ // Izquierda 
+                                player.x +=10;
+                            }else { // Derecha
+                                player.x -=10;
+                            }
+                            moveX = 0;
+                            moveY = 0;
+                        }
+                        if(frutas){
+
+                        }
                     }   
                 }
+            }
+            function asignacionDeMuro(enemigosArreglo, persecutor){
+                for(let findex = 0; findex < changewalls.length; findex++){
+					for(let sindex = 0; sindex < enemigosArreglo.length; sindex++){
+						if(enemigosArreglo[sindex].getX < changewalls[findex].getX + changewalls[findex].getWidth &&  enemigosArreglo[sindex].getX + 2 > changewalls[findex].getX && 
+						enemigosArreglo[sindex].getY < changewalls[findex].getY + changewalls[findex].getHeight &&  enemigosArreglo[sindex].getY + 2> changewalls[findex].getY){	
+							//tocarBorde(enemies[sindex]);
+                            if(enemigosArreglo[sindex].getNotTheSameWall != findex){
+                                enemigosArreglo[sindex].setNotTheSameWall = findex;
+                                if(persecutor)
+                                    cambioSiguiendoJugador(enemigosArreglo[sindex]);
+                                else{
+                                    
+                                }
+                            }
+                        }		
+					}   
+				}
+            }
+            function detectorColisionesEnemigosMuros(enemigosArreglo){
+                //Detectos de colisiones de enemigos contra los muros
                 for(let findex = 0; findex < walls.length; findex++){
-					for(let sindex = 0; sindex < enemies.length; sindex++){
-						if(enemies[sindex].getX < walls[findex].getX + walls[findex].getWidth &&  enemies[sindex].getX + enemies[sindex].getWidth > walls[findex].getX && 
-						enemies[sindex].getY < walls[findex].getY + walls[findex].getHeight &&  enemies[sindex].getY + enemies[sindex].getWidth > walls[findex].getY){	
-							tocarBorde(enemies[sindex]);
-						}		
-						//CAMBIO ALEATORIO DE DIRECCIÓN CON BORDE
-						if(enemies[sindex].getX <= 0){
-							tocarBorde(enemies[sindex]);
-						}else if(enemies[sindex].getX >= 1470 - enemies[sindex].getWidth){
-							tocarBorde(enemies[sindex]);
-						}else if(enemies[sindex].getY <= 0){
-							tocarBorde(enemies[sindex]);
-						}else if(enemies[sindex].getY >= 800 - enemies[sindex].getWidth){
-							tocarBorde(enemies[sindex]);
-						}
-
+					for(let sindex = 0; sindex < enemigosArreglo.length; sindex++){
+						if(enemigosArreglo[sindex].getX < walls[findex].getX + walls[findex].getWidth &&  enemigosArreglo[sindex].getX + enemigosArreglo[sindex].getWidth > walls[findex].getX && 
+						enemigosArreglo[sindex].getY < walls[findex].getY + walls[findex].getHeight &&  enemigosArreglo[sindex].getY + enemigosArreglo[sindex].getWidth > walls[findex].getY){	
+                            //0 izquierda
+                            //1 derecha
+                                if(enemigosArreglo[sindex].movementx == 0){
+                                    if(enemigosArreglo[sindex].getNotTheSameWall != null)
+                                        enemigosArreglo[sindex].setY = changewalls[enemigosArreglo[sindex].getNotTheSameWall].getY;
+                                    enemigosArreglo[sindex].x += 5;
+                                    enemigosArreglo[sindex].movementx = 1;
+                                }else if(enemigosArreglo[sindex].movementx == 1){
+                                    if(enemigosArreglo[sindex].getNotTheSameWall != null)
+                                        enemigosArreglo[sindex].setY = changewalls[enemigosArreglo[sindex].getNotTheSameWall].getY;
+                                    enemigosArreglo[sindex].x -= 5;
+                                    enemigosArreglo[sindex].movementx = 0;
+                                }else if(enemigosArreglo[sindex].movementy == 1){
+                                    if(enemigosArreglo[sindex].getNotTheSameWall != null)
+                                        enemigosArreglo[sindex].setX = changewalls[enemigosArreglo[sindex].getNotTheSameWall].getX;
+                                    enemigosArreglo[sindex].y -= 5;
+                                    enemigosArreglo[sindex].movementy = 0;
+                                }else if(enemigosArreglo[sindex].movementy == 0){
+                                    if(enemigosArreglo[sindex].getNotTheSameWall != null)
+                                        enemigosArreglo[sindex].setX = changewalls[enemigosArreglo[sindex].getNotTheSameWall].getX;
+                                        enemigosArreglo[sindex].y += 5;
+                                        enemigosArreglo[sindex].movementy = 1;
+                                }
+                                enemigosArreglo[sindex].setNotTheSameWall = null;
+                        }	
 					}   
 				}
             }
@@ -589,19 +691,74 @@
                 walls[_index].x = 9999;
             }
 
+            function detectorTeletransporte(coordenada, rango, comparador){
+                return comparador == 1 ? (coordenada < rango) : (coordenada > rango)
+            }
+            
+            //0 y 1 = movimiento 
+            //2 y 3 = parado
+            let enemies = [
+            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),];
+
+            let normalEnemies = [
+            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),];
+
             function movimientoEnemigos(){
                 for(let findex = 0; findex < enemies.length; findex++){
-                    
                     if(enemies[findex].movementx == 1){
-                        enemies[findex].x +=enemyspeed;
+                        if(detectorTeletransporte(enemies[findex].getX, 1200, 1))
+                            enemies[findex].x +=enemyspeed;
+                        else
+                            enemies[findex].setX = 0;
                     }else if(enemies[findex].movementx == 0){
-                        enemies[findex].x -=enemyspeed;
+                        if(detectorTeletransporte(enemies[findex].getX, 0, 2))
+                            enemies[findex].x -=enemyspeed;
+                        else
+                            enemies[findex].setX = 1200;
                     }else if(enemies[findex].movementy == 0){
-                        enemies[findex].y -=enemyspeed;
+                        if(detectorTeletransporte(enemies[findex].getY, 0, 2))
+                            enemies[findex].y -=enemyspeed;
+                        else
+                            enemies[findex].setY = 800;
                     }else if(enemies[findex].movementy == 1){
-                        enemies[findex].y +=enemyspeed;
+                        if(detectorTeletransporte(enemies[findex].getY, 800, 1))
+                            enemies[findex].y +=enemyspeed;
+                        else
+                            enemies[findex].setY = 0;
                     }
                     ctx.drawImage(enemies[findex].img, enemies[findex].getX, enemies[findex].getY, enemies[findex].getWidth, enemies[findex].getWidth);
+                }
+                for(let findex = 0; findex < normalEnemies.length; findex++){
+                    if(normalEnemies[findex].movementx == 1){
+                        if(detectorTeletransporte(normalEnemies[findex].getX, 1200, 1))
+                            normalEnemies[findex].x +=enemyspeed;
+                        else
+                            normalEnemies[findex].setX = 0;
+                    }else if(normalEnemies[findex].movementx == 0){
+                        if(detectorTeletransporte(normalEnemies[findex].getX, 0, 2))
+                            normalEnemies[findex].x -=enemyspeed;
+                        else
+                            normalEnemies[findex].setX = 1200;
+                    }else if(normalEnemies[findex].movementy == 0){
+                        if(detectorTeletransporte(normalEnemies[findex].getY, 0, 2))
+                        normalEnemies[findex].y -=enemyspeed;
+                        else
+                            normalEnemies[findex].setY = 800;
+                    }else if(normalEnemies[findex].movementy == 1){
+                        if(detectorTeletransporte(normalEnemies[findex].getY, 800, 1))
+                            normalEnemies[findex].y +=enemyspeed;
+                        else
+                            normalEnemies[findex].setY = 0;
+                    }
+                    ctx.drawImage(normalEnemies[findex].img, normalEnemies[findex].getX, normalEnemies[findex].getY, normalEnemies[findex].getWidth, normalEnemies[findex].getWidth);
                 }
             }
             function cambio(){
@@ -612,120 +769,63 @@
                 return flag2;
             }
 
-            let cambiores;
-            function tocarBorde(changolion){
-                if(changolion.movementx == 0){
-                    changolion.x += 5;
-                    if(cambio()){
-                        cambiores = cambio();
-                        while(true){
-                            if(cambiores && changolion.movementx == 1)
-                                cambiores = cambio();
-                            else if(!cambiores && changolion.movementx == 0)
-                                cambiores = cambio();
-                            else
-                                break;
-                        }
-                        changolion.movementy = 3;
-                        changolion.movementx = cambiores ? 1 : 0;
+            //Hacer que cada que toque un punto
+            //Saque la distancia que hay en Y
+            //Y la distancia que hay en X
+            //Compare cual de las 2 es la mas corta y escoja esa para avanzar
+            //Si choca con un muro, que es lo que consideramos un error
+            //Hacer que avance hacia la segunda opcion
+            let distanciaX = 0, distanciaY = 0;
+            let distanciaXAbs;
+            let distanciaYAbs;
+            
+            function cambioSiguiendoJugador(fantasma){
+                distanciaX = fantasma.getX - player.getX-10;
+                distanciaY = fantasma.getY - player.getY-10;
+                distanciaXAbs = Math.abs(distanciaX);
+                distanciaYAbs = Math.abs(distanciaY);
+
+                if(Math.round(Math.random(2)) == 1){
+                    if(distanciaX < 0){
+                        fantasma.movementx = 1;
                     }else{
-                        cambiores = cambio();
-                        while(true){
-                            if(cambiores && changolion.movementy == 1)
-                                cambiores = cambio();
-                            else if(!cambiores && changolion.movementy == 0)
-                                cambiores = cambio();
-                            else
-                                break;
-                        }
-                        changolion.movementx = 3;
-                        changolion.movementy = cambiores ? 1 : 0;
+                        fantasma.movementx = 0;
                     }
-                }else if(changolion.movementx == 1){
-                    changolion.x -= 5;
-                    if(cambio()){
-                        cambiores = cambio();
-                        while(true){
-                            if(cambiores && changolion.movementx == 1)
-                                cambiores = cambio();
-                            else if(!cambiores && changolion.movementx == 0)
-                                cambiores = cambio();
-                            else
-                                break;
-                        }
-                        changolion.movementy = 3;
-                        changolion.movementx = cambiores ? 1 : 0;
+
+                    fantasma.movementy = 2;
+                }else{
+                    if(distanciaY < 0){
+                        fantasma.movementy = 1;
                     }else{
-                        cambiores = cambio();
-                        while(true){
-                            if(cambiores && changolion.movementy == 1)
-                                cambiores = cambio();
-                            else if(!cambiores && changolion.movementy == 0)
-                                cambiores = cambio();
-                            else
-                                break;
-                        }
-                        changolion.movementx = 3;
-                        changolion.movementy = cambiores ? 1 : 0;
+                        fantasma.movementy = 0;
                     }
-                }else if(changolion.movementy == 1){
-                    changolion.y -= 5;
-                    if(cambio()){
-                        cambiores = cambio();
-                        while(true){
-                            if(cambiores && changolion.movementx == 1)
-                                cambiores = cambio();
-                            else if(!cambiores && changolion.movementx == 0)
-                                cambiores = cambio();
-                            else
-                                break;
-                        }
-                        changolion.movementy = 3;
-                        changolion.movementx = cambiores ? 1 : 0;
-                    }else{
-                        cambiores = cambio();
-                        while(true){
-                            if(cambiores && changolion.movementy == 1)
-                                cambiores = cambio();
-                            else if(!cambiores && changolion.movementy == 0)
-                                cambiores = cambio();
-                            else
-                                break;
-                        }
-                        changolion.movementx = 3;
-                        changolion.movementy = cambiores ? 1 : 0;
-                    }
-                }else if(changolion.movementy == 0){
-                    changolion.y += 5;
-                    if(cambio()){
-                        cambiores = cambio();
-                        while(true){
-                            if(cambiores && changolion.movementy == 1)
-                                cambiores = cambio();
-                            else if(!cambiores && changolion.movementy == 0)
-                                cambiores = cambio();
-                            else
-                                break;
-                        }
-                        changolion.movementy = 3;
-                        changolion.movementx = cambiores ? 1 : 0;
-                    }else{
-                        cambiores = cambio();
-                        while(true){
-                            if(cambiores && changolion.movementy == 1)
-                                cambiores = cambio();
-                            else if(!cambiores && changolion.movementy == 0)
-                                cambiores = cambio();
-                            else
-                                break;
-                        }
-                        changolion.movementx = 3;
-                        changolion.movementy = cambiores ? 1 : 0;
-                    }
+                    fantasma.movementx = 2;
                 }
             }
             function enemigos(){
                 movimientoEnemigos();
+            }
+            
+            let minutos = 0;
+            function mostrarTiempo(){
+                ctx.beginPath();
+                ctx.font = "60px Arial"; 
+                ctx.fillStyle = "white";
+                if (tiempo > 9) {
+                    ctx.fillText(tiempo, 710, 420);
+                    if(tiempo > 59){
+                        minutos += 1;
+                        tiempo = 0;
+                    }
+                } else {
+                    ctx.fillText("0" + tiempo, 710, 420);
+                }
+
+                if (minutos > 0) {
+                    ctx.fillText("0"+minutos, 430, 420);
+                } else {
+                    ctx.fillText("00", 430, 420);
+                }
 
             }
 
@@ -743,15 +843,13 @@
                     enemigos();
                     dibujarEscenario();
                     animacionPacman();
+                    mostrarTiempo();
                     detectorColisiones(player);
                     contadorr++;
-                    if(contadorr>320){
-                        for(let findex = 0; findex < enemies.length/2; findex++){
-                            tocarBorde(enemies[Math.floor(Math.random() * (enemies.length - 0 + 0) + 0)]);
-                        }
-                        tiempo++;
+                    //Tiempo de espera para que los fantasmas cambien de direccion
+                    if(contadorr>60){
+                        tiempo += 1;
                         contadorr = 0;
-                        console.log("TIEMPO: "+tiempo);
                     }
                 }
                 window.requestAnimationFrame(Animacion);
