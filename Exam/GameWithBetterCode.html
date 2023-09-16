@@ -9,10 +9,24 @@
     <body>
         <canvas id="myCanvas" width="1200" height="800" style="border: 2px solid black"></canvas>
         <img id="fanstasmaRojo" src="./img/fantasma_rojo.png" width="45px">
+        <img id="pinky" src="./img/pinky.png" width="45px"><br>
+
+        <img id="cereza" src="./img/cereza.png" width="45px">
+        <img id="fresa" src="./img/fresa.png" width="45px">
+        <img id="platano" src="./img/platano.png" width="45px">
+        <img id="manzana" src="./img/manzana.png" width="45px">
+        <audio id="audio" src="./sounds/pacmanmuerte.mp3"></audio>
         <script>
+            let myAudio = document.querySelector('#audio');
+
             const canvas = document.getElementById("myCanvas");
             const ctx = canvas.getContext("2d");    
-            const img = document.getElementById("fanstasmaRojo"); 
+            const img = document.getElementById("fanstasmaRojo");
+            const imgPinky = document.getElementById("pinky");
+            const imgApple = document.getElementById("manzana");  
+            const imgBanana = document.getElementById("platano");  
+            const imgStrawberry = document.getElementById("fresa");  
+            const imgFruit = document.getElementById("cereza");  
 		    let enemyspeed = 2;
             // Fondo de Pantalla
             function fondoNegro(){
@@ -165,13 +179,24 @@
                     super(_x,_y,_width,_height);
                 }
             }
+            class Fruit extends DetectionParam{
+                constructor(_x,_y,_width,_height,_image,_puntuacion){
+                    super(_x,_y,_width,_height);
+                    this.image = _image;
+                    this.points = _puntuacion;
+                }
+            }
+            let fruits = [];
+            fruits = [new Fruit(250,270,30,30,imgApple),
+                      new Fruit(1060,400,30,30,imgBanana),
+                      new Fruit(920,680,30,30,imgStrawberry),
+                      new Fruit(550,100,30,30,imgFruit)];
+                      
             class Change extends DetectionParam{
                 constructor(_x,_y,_width,_height){
                     super(_x,_y,_width,_height);
                 }
             }
-            let changewalls = [];
-
             //Creacion de objetos del mapa
             let player = new Player(700,270,20,20,20);
 
@@ -185,23 +210,14 @@
 
             //Animación y movimiento del pacman
             function animacionPacman() {
-                //Caja de pacman
-                // ctx.fillStyle = "red";
-                // ctx.beginPath();
-                // ctx.rect(player.getX, player.getY,player.getWidth*2,player.getHeight*2);
-                // ctx.fill();
-
                 //Circulo de pacman
                 ctx.beginPath();
                 x = player.getX + player.getRad;
                 y = player.getY + player.getRad;
                 ctx.moveTo(x, y);
-
                 //Angulo de la boca
                 const mouthRadians = (mouthAngle * Math.PI) / 260;
-
                 let startAngle, endAngle;
-
                 if (direction === 90) { // Arriba
                     startAngle = (Math.PI * 1.5) + (mouthRadians / 2);
                     endAngle = (Math.PI * 1.5) - (mouthRadians / 2);
@@ -212,13 +228,11 @@
                     startAngle = (mouthRadians / 2) + (direction * Math.PI) / 180;
                     endAngle = (2 * Math.PI) - ((mouthRadians / 2) + (direction * Math.PI) / 180);
                 }
-
                 //Boca
                 ctx.arc(x, y, player.getRad, startAngle, endAngle); 
                 ctx.lineTo(x, y); 
                 ctx.fillStyle = "yellow"; 
                 ctx.fill();
-
                 //Abrir o cerrar la boca
                 if (!bocaFlag) {
                     mouthAngle += 10;
@@ -231,7 +245,6 @@
                         bocaFlag = false;
                     }
                 }
-                
                 //Mover al jugador
                 player.x += moveX;
                 player.y += moveY;
@@ -291,7 +304,6 @@
                 ctx.stroke();
                 _indexx += 1;
             }   
-
             //Cambiar a crear muros
             let changeWallsHeight = 10;
             let changeWallsWidth = 12;
@@ -339,12 +351,19 @@
                             new Change(1170 - 470, 618, changeWallsWidth, changeWallsHeight),
                             new Change(1170 - 470, 505, changeWallsWidth, changeWallsHeight),
                         ];
+            function dibujarFrutas(){
+                 for (let index = 0; index < fruits.length; index++) {
+                     ctx.beginPath();
+                     ctx.drawImage(fruits[index].image, fruits[index].getX, fruits[index].getY, fruits[index].getWidth, fruits[index].getWidth);
+                 }
+            }
             function dibujarEscenario(){
                 //Dibujar zonas de cambio
                 for (let index = 0; index < changewalls.length; index++) {
                     ctx.beginPath();
                     ctx.fillStyle = "yellow";
                     ctx.rect(changewalls[index].getX, changewalls[index].getY, changewalls[index].getWidth, changewalls[index].getHeight);
+                    ctx.fill();
                 }
                 
                 _indexx = 0;
@@ -595,25 +614,39 @@
                     _player.x = 0;
             }
             function detectorColisiones(_player){
-                //detector de colisiones del jugador contra los muros
+                colisionesDelJugador(_player, fruits,false,false,true);
                 colisionesDelJugador(_player, walls,false,true,false);
                 colisionesDelJugador(_player, enemies,true,false,false);
-
+                colisionesDelJugador(_player, normalEnemies,true,false,false);
                 asignacionDeMuro(normalEnemies,false);
                 asignacionDeMuro(enemies,true);
-
                 detectorColisionesEnemigosMuros(normalEnemies);
                 detectorColisionesEnemigosMuros(enemies);
-                
             }
             function colisionesDelJugador(_player,arregloDeObjetos, enemigos, muros, frutas){
                 for (let index = 0; index < arregloDeObjetos.length; index++) {
                     if(_player.getX + 10 < arregloDeObjetos[index].getX + arregloDeObjetos[index].getWidth && _player.getX + _player.getWidth*2 -10 > arregloDeObjetos[index].getX
                     && _player.getY + 10 < arregloDeObjetos[index].getY + arregloDeObjetos[index].getHeight && _player.getY + _player.getHeight*2 -10> arregloDeObjetos[index].getY){
-                        if(enemies){
-                            //alert("Te toque");
+                        if(enemigos){
+                            console.log(enemigos);
+                            console.log(muros);
+                            _player.setX = 35;
+                            _player.setY = 35;
+                            moveX = 0;
+                            moveY = 0;
+                            for (let index = 0; index < enemies.length; index++) {
+                                enemies[index].setX = 580;
+                                enemies[index].setY = 270;
+                            }
+                            for (let index = 0; index < normalEnemies.length; index++) {
+                                normalEnemies[index].setX = 580;
+                                normalEnemies[index].setY = 270;
+                            }
+                            myAudio.volume = 0.2;
+                            myAudio.play();
                         }
                         if(muros){
+                            console.log("Muro");
                             collisionIndex = index;
                             if (direction === 90) { // Arriba
                                 player.y +=10;
@@ -627,9 +660,48 @@
                             moveX = 0;
                             moveY = 0;
                         }
-                        if(frutas){
+                        if (frutas) {
+                            let banderita = false;
+                            
+                            while (!banderita) {
+                                const newX = Math.floor(Math.random() * 1100);
+                                const newY = Math.floor(Math.random() * 700);
+                                let colision = false;
 
+                                for (let findex = 0; findex < walls.length; findex++) {
+                                    if (
+                                        newX < walls[findex].getX + walls[findex].getWidth &&
+                                        newX + fruits[index].getWidth > walls[findex].getX &&
+                                        newY < walls[findex].getY + walls[findex].getHeight &&
+                                        newY + fruits[index].getHeight > walls[findex].getY
+                                    ) {
+                                        colision = true;
+                                        break;
+                                    }
+                                }
+
+                                for (let sindex = 0; sindex < fruits.length; sindex++) {
+                                    if (sindex !== index) { 
+                                        if (
+                                            newX < fruits[sindex].getX + fruits[sindex].getWidth &&
+                                            newX + fruits[index].getWidth > fruits[sindex].getX &&
+                                            newY < fruits[sindex].getY + fruits[sindex].getHeight &&
+                                            newY + fruits[index].getHeight > fruits[sindex].getY
+                                        ) {
+                                            colision = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (!colision) {
+                                    fruits[index].setX = newX;
+                                    fruits[index].setY = newY;
+                                    banderita = true;
+                                }
+                            }
                         }
+
                     }   
                 }
             }
@@ -702,15 +774,16 @@
             new Enemy(580,380,30,img,2,Math.round(Math.random(2))),];
 
             let normalEnemies = [
-            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),];
+            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
+            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),];
 
+            //hacer una funcion para simplificar
             function movimientoEnemigos(){
                 for(let findex = 0; findex < enemies.length; findex++){
                     if(enemies[findex].movementx == 1){
@@ -760,13 +833,6 @@
                     }
                     ctx.drawImage(normalEnemies[findex].img, normalEnemies[findex].getX, normalEnemies[findex].getY, normalEnemies[findex].getWidth, normalEnemies[findex].getWidth);
                 }
-            }
-            function cambio(){
-                if(Math.round(Math.random()) == 1){
-                    flag2 = true;
-                }else
-                    flag2 = false;
-                return flag2;
             }
 
             //Hacer que cada que toque un punto
@@ -830,21 +896,28 @@
             }
 
             let contadorr = 0;
-            var ultimoCuadro = 0, fps = 60; 
+            var ultimoCuadro = 0, fps = 60;
+            let pausa = false;
+            let contpausa = 0;
             function Animacion() {
                 var ahora = Date.now();
                 var tiempoTranscurrido = ahora - ultimoCuadro;
-                var intervaloCuadro = 1000 / fps; 
-
+                var intervaloCuadro = 1000 / fps;  
                 if (tiempoTranscurrido > intervaloCuadro) {
                     ultimoCuadro = ahora - (tiempoTranscurrido % intervaloCuadro);
-                    cambioDeLugarMapa(player);
-                    fondoNegro();
-                    enemigos();
-                    dibujarEscenario();
-                    animacionPacman();
-                    mostrarTiempo();
-                    detectorColisiones(player);
+                    if(!pausa){
+                        cambioDeLugarMapa(player);
+                        fondoNegro();
+                        enemigos();
+                        dibujarEscenario();
+                        dibujarFrutas();
+                        animacionPacman();
+                        mostrarTiempo();
+                        detectorColisiones(player);
+                        contpausa = 0;
+                    }else{
+
+                    }
                     contadorr++;
                     //Tiempo de espera para que los fantasmas cambien de direccion
                     if(contadorr>60){
