@@ -6,24 +6,40 @@
         <link rel="stylesheet" href="Game.css">
         <title>Pacman v0.2</title>
     </head>
-    <body>
+    <body style="display: flex; justify-content: center; align-items: center; background-color: black; gap: 10px;">
         <canvas id="myCanvas" width="1200" height="800" style="border: 2px solid black"></canvas>
-        <img id="fanstasmaRojo" src="./img/fantasma_rojo.png" width="45px">
-        <img id="pinky" src="./img/pinky.png" width="45px"><br>
+        <p style="color: white; border: 2px solid white; padding: 10px;">
+            <span style="font-size: 25px;">Juego:</span><br>
+            Cada 15 segundos se genera un nuevo Blinky (Fantasma Rojo).<br>
+            Cada 10 segundos se genera un nuevo Pinky (Fantasma Rosa).<br>
+            Recoge todos los puntos para ganar.<br><br>
+            <span style="font-size: 25px;">Controles:</span><br>
+            W = Arriba.<br>
+            A = Izquierda.<br>
+            S = Abajo.<br>
+            D = Derecha.<br>
+            Espacio = Comer Muro.<br>
+            Q = Pausa.<br>
+        </p>
 
-        <img id="cereza" src="./img/cereza.png" width="45px">
-        <img id="fresa" src="./img/fresa.png" width="45px">
-        <img id="platano" src="./img/platano.png" width="45px">
-        <img id="manzana" src="./img/manzana.png" width="45px">
+        <img id="fanstasmaRojo" src="./img/fantasma_rojo.png" width="45px" style="display: none;">
+        <img id="pinky" src="./img/pinky.png" width="45px" style="display: none;"><br>
+
+        <img id="cereza" src="./img/cereza.png" width="45px" style="display: none;">
+        <img id="fresa" src="./img/fresa.png" width="45px" style="display: none;">
+        <img id="platano" src="./img/platano.png" width="45px" style="display: none;">
+        <img id="manzana" src="./img/manzana.png" width="45px" style="display: none;">
         <audio id="audio" src="./sounds/pacmanmuerte.mp3"></audio>
         <audio id="audiocancion" src="./sounds/pacmancancion.mp3"></audio>
         <audio id="comefruta" src="./sounds/comefruta.mp3"></audio>
         <audio id="breakwall" src="./sounds/romperpared.mp3"></audio>
+        <audio id="wakawaka" src="./sounds/wakawaka.mp3"></audio>
         <script>
             let myAudio = document.querySelector('#audio');
             let mySong = document.querySelector('#audiocancion');
             let eat = document.querySelector('#comefruta');
             let breakwall = document.querySelector('#breakwall');
+            let wakawaka = document.querySelector('#wakawaka');
 
             const canvas = document.getElementById("myCanvas");
             const ctx = canvas.getContext("2d");    
@@ -103,7 +119,7 @@
                         else
                             moveY = velocidad;
                         break;
-                        case 81:
+                    case 81:
                             pausaMaestra = !pausaMaestra;
                             break;
                 }
@@ -264,7 +280,7 @@
                     endAngle = (2 * Math.PI) - ((mouthRadians / 2) + (direction * Math.PI) / 180);
                 }
                 //Boca
-                ctx.arc(x, y, player.getRad, startAngle, endAngle); 
+                ctx.arc(x, y, player.getRad-3, startAngle, endAngle); 
                 ctx.lineTo(x, y); 
                 ctx.fillStyle = "yellow"; 
                 ctx.fill();
@@ -396,41 +412,102 @@
             let pointsArray = [];
             function crearPuntos(){
                 for (let index = 0; index < 18; index++) {
-                    console.log("wtf");
-                    pointsArray.push(new Points(55 + (30*index),55,30,30));
+                    
+                    pointsArray.push(new Points(55 + (30*index),55, 20,20));
                 }
                 for (let index = 0; index < 18; index++) {
-                    console.log("wtf");
-                    pointsArray.push(new Points(55 + (30*index),175,30,30));
+                    
+                    pointsArray.push(new Points(55 + (30*index),175, 20,20));
                 }
                 for (let index = 0; index < 18; index++) {
-                    console.log("wtf");
-                    pointsArray.push(new Points(55 + (30*index),630,30,30));
+                    
+                    pointsArray.push(new Points(55 + (30*index),630, 20,20));
                 }
                 for (let index = 0; index < 18; index++) {
-                    console.log("wtf");
-                    pointsArray.push(new Points(55 + (30*index),750,30,30));
+                    
+                    pointsArray.push(new Points(55 + (30*index),750, 20,20));
                 }
 
                 for (let index = 0; index < 18; index++) {
-                    console.log("wtf");
-                    pointsArray.push(new Points(640 + (30*index),55,30,30));
+                    
+                    pointsArray.push(new Points(640 + (30*index),55, 20,20));
                 }
                 for (let index = 0; index < 18; index++) {
-                    console.log("wtf");
-                    pointsArray.push(new Points(640 + (30*index),175,30,30));
+                    
+                    pointsArray.push(new Points(640 + (30*index),175, 20,20));
                 }
                 for (let index = 0; index < 18; index++) {
-                    console.log("wtf");
-                    pointsArray.push(new Points(640 + (30*index),630,30,30));
+                    
+                    pointsArray.push(new Points(640 + (30*index),630, 20,20));
                 }
                 for (let index = 0; index < 18; index++) {
-                    console.log("wtf");
-                    pointsArray.push(new Points(640 + (30*index),750,30,30));
+                    
+                    pointsArray.push(new Points(640 + (30*index),750, 20,20));
                 }
                 for (let index = 0; index < 14; index++) {
-                    console.log("wtf");
-                    pointsArray.push(new Points(265,210 + (30*index),30,30));
+                    
+                    pointsArray.push(new Points(265,210 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 14; index++) {
+                    
+                    pointsArray.push(new Points(940,210 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 9; index++) {
+                    pointsArray.push(new Points(480 + (30*index),520, 20,20));
+                }
+                for (let index = 0; index < 9; index++) {
+                    pointsArray.push(new Points(480 + (30*index),290, 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(480,200 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(720,200 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(480,545 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(720,545 + (30*index), 20,20));
+                }
+                
+                
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(55,660 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(265,660 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(565,660 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(640,660 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(940,660 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(1150,660 + (30*index), 20,20));
+                }
+
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(55,80 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(265,80 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(565,80 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(640,80 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(940,80 + (30*index), 20,20));
+                }
+                for (let index = 0; index < 3; index++) {
+                    pointsArray.push(new Points(1150,80 + (30*index), 20,20));
                 }
                 console.log("Largo de array"+pointsArray.length);
             }
@@ -684,6 +761,7 @@
                 for(let i = 2; i < (400 - anchura * 2) / anchura; i++){
                     cuerpoRectangulo(60 + moverT, 200 + (i * anchura), 2, true);
                 }
+                
                 createFlag = true;
             }
             function cambioDeLugarMapa(_player){
@@ -697,16 +775,18 @@
                     _player.x = 0;
             }
             function detectorColisiones(_player){
-                colisionesDelJugador(_player, fruits,false,false,true);
-                colisionesDelJugador(_player, walls,false,true,false);
-                colisionesDelJugador(_player, enemies,true,false,false);
-                colisionesDelJugador(_player, normalEnemies,true,false,false);
+                colisionesDelJugador(_player, fruits,false,false,true,false);
+                colisionesDelJugador(_player, walls,false,true,false,false);
+                colisionesDelJugador(_player, enemies,true,false,false,false);
+                colisionesDelJugador(_player, normalEnemies,true,false,false,false);
+                colisionesDelJugador(_player, pointsArray,false,false,false,true);
                 asignacionDeMuro(normalEnemies,false);
                 asignacionDeMuro(enemies,true);
                 detectorColisionesEnemigosMuros(normalEnemies);
                 detectorColisionesEnemigosMuros(enemies);
             }
-            function colisionesDelJugador(_player,arregloDeObjetos, enemigos, muros, frutas){
+            let contGanar;
+            function colisionesDelJugador(_player,arregloDeObjetos, enemigos, muros, frutas, puntos){
                 for (let index = 0; index < arregloDeObjetos.length; index++) {
                     if(_player.getX + 10 < arregloDeObjetos[index].getX + arregloDeObjetos[index].getWidth && _player.getX + _player.getWidth*2 -10 > arregloDeObjetos[index].getX
                     && _player.getY + 10 < arregloDeObjetos[index].getY + arregloDeObjetos[index].getHeight && _player.getY + _player.getHeight*2 -10> arregloDeObjetos[index].getY){
@@ -730,6 +810,20 @@
                             vidas -= 1;
                             pausa = true;
                         }
+                        if(puntos){
+                            arregloDeObjetos[index].setX = 9999;
+                            wakawaka.play();
+                            wakawaka.volume = 0.1;
+                            contGanar = 0;
+                            for (let index = 0; index < arregloDeObjetos.length; index++) {
+                                if(arregloDeObjetos[index].getX == 9999)
+                                    contGanar+=1;
+                            }
+                            score += 10;
+                            if(contGanar >= arregloDeObjetos.length)
+                                pausaMaestra = true;
+                            
+                        }
                         if(muros){
                             console.log("Muro");
                             collisionIndex = index;
@@ -748,6 +842,7 @@
                         if (frutas) {
                             let banderita = false;
                             comerPared+=1;
+                            eat.volume = 0.2;
                             eat.play();
                             while (!banderita) {
                                 const newX = Math.floor(Math.random() * 1100);
@@ -783,7 +878,7 @@
                                 if (!colision) {
                                     fruits[index].setX = newX;
                                     fruits[index].setY = newY;
-                                    score += fruits[index].points
+                                    score += fruits[index].points;
                                     banderita = true;
                                 }
                             }
@@ -879,6 +974,7 @@
                 if(comerPared>0){
                     walls[_index].x = 9999;
                     comerPared--;
+                    breakwall.volume = 0.2;
                     breakwall.play();
                 }
             }
@@ -1043,6 +1139,21 @@
                 ctx.font = "200px Arial Italic"; 
                 ctx.fillText("GAME OVER! ", 5, 450);
             }
+            function mostrarGanaste(){
+                ctx.beginPath();
+                ctx.fillStyle = "YELLOW";
+                ctx.font = "200px Arial Italic"; 
+                ctx.fillText("WINNER! ", 160, 450);
+            }
+            function mostrarPuntosFaltantes(){
+                ctx.beginPath();
+                ctx.fillStyle = "YELLOW";
+                ctx.font = "20px Arial Italic"; 
+                let puntosT = pointsArray.length;
+                puntosT = puntosT - contGanar;
+                console.log(puntosT);
+                ctx.fillText("Faltan: "+ (puntosT), 773, 250);
+            }
 
             let contadorr = 0;
             var ultimoCuadro = 0, fps = 60;
@@ -1065,6 +1176,7 @@
                         animacionPacman();
                         mostrarTiempo();
                         mostrarCantidadPoder();
+                        mostrarPuntosFaltantes();
                         mostrarVidas();
                         mostrarPuntos();
                         detectorColisiones(player);
@@ -1101,11 +1213,14 @@
                             contpausa++;
                         tiempo += 1;
                         contadorr = 0;
-                        if(tiempo != 0 && tiempo % 8 == 0 && !pausa)
+                        if(tiempo != 0 && tiempo % 15 == 0 && !pausa)
                             generarFuerte = !generarFuerte;
-                        if(tiempo != 0 && tiempo % 4 == 0 && !pausa)
+                        if(tiempo != 0 && tiempo % 10 == 0 && !pausa)
                             generarNormal = !generarNormal;
                     }
+                }
+                if(contGanar>=pointsArray.length){
+                    mostrarGanaste();
                 }
                 if(vidas>-1){
                     window.requestAnimationFrame(Animacion);
