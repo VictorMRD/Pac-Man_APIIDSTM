@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="Game.css">
+        <title>Pacman v0.2</title>
+    </head>
+    <body>
+        <canvas id="myCanvas" width="1200" height="800" style="border: 2px solid black"></canvas>
+        <img id="fanstasmaRojo" src="./img/fantasma_rojo.png" width="45px">
+        <img id="pinky" src="./img/pinky.png" width="45px"><br>
+
+        <img id="cereza" src="./img/cereza.png" width="45px">
+        <img id="fresa" src="./img/fresa.png" width="45px">
+        <img id="platano" src="./img/platano.png" width="45px">
+        <img id="manzana" src="./img/manzana.png" width="45px">
+        <audio id="audio" src="./sounds/pacmanmuerte.mp3"></audio>
+        <audio id="audiocancion" src="./sounds/pacmancancion.mp3"></audio>
+        <audio id="comefruta" src="./sounds/comefruta.mp3"></audio>
+        <audio id="breakwall" src="./sounds/romperpared.mp3"></audio>
+        <script>
+            let myAudio = document.querySelector('#audio');
+            let mySong = document.querySelector('#audiocancion');
+            let eat = document.querySelector('#comefruta');
+            let breakwall = document.querySelector('#breakwall');
+
+            const canvas = document.getElementById("myCanvas");
+            const ctx = canvas.getContext("2d");    
+            const img = document.getElementById("fanstasmaRojo");
+            const imgPinky = document.getElementById("pinky");
+            const imgApple = document.getElementById("manzana");  
+            const imgBanana = document.getElementById("platano");  
+            const imgStrawberry = document.getElementById("fresa");  
+            const imgFruit = document.getElementById("cereza");  
+		    let enemyspeed = 2;
+            // Fondo de Pantalla
+            function fondoNegro(){
+                ctx.beginPath();
+                ctx.fillStyle = "black";
+                ctx.rect(0,0,1200,800);
+                ctx.fill();
+            }
+
+            //Agregar detector de teclas 
+            let tiempo = 0;
+            let moveX = 0, moveY = 0, velocidad = 4; 
+            let collisionIndex, lastMovement;
+            let moverse = 890;
+            let comerPared = 3;
+            let vidas = 3;
+            let pausaMaestra = false;
+            document.addEventListener("keydown", (e) =>{
+                mySong.play();
+                mySong.volume = 0.1;
+                console.log(e.keyCode);
+                switch (e.keyCode) {
+                    case 87:
+                        direction = 90; // Up
+                        moveX = 0;
+                        moveY = -velocidad;
+                        lastMovement = 87;
+                        break;
+                    case 65:
+                        moveY = 0;
+                        moveX = -velocidad;
+                        direction = 180; // Left7
+                        lastMovement = 65;
+                        break;
+                    case 83:
+                        moveX = 0;
+                        moveY = velocidad;
+                        direction = 270; // Down
+                        lastMovement = 83;
+                        break;
+                    case 68:
+                        moveY = 0;
+                        moveX = velocidad;
+                        direction = 0; // Right
+                        lastMovement = 68;
+                        break;
+                    case 32:
+                        destruirMuro(collisionIndex);
+                        collisionIndex = null;
+                        if(lastMovement == 68)
+                            moveX = velocidad;
+                        else if(lastMovement == 87)
+                            moveY = -velocidad;
+                        else if(lastMovement == 65)
+                            moveX = -velocidad;
+                        else
+                            moveY = velocidad;
+                        break;
+                        case 32:
+                        destruirMuro(collisionIndex);
+                        collisionIndex = null;
+                        if(lastMovement == 68)
+                            moveX = velocidad;
+                        else if(lastMovement == 87)
+                            moveY = -velocidad;
+                        else if(lastMovement == 65)
+                            moveX = -velocidad;
+                        else
+                            moveY = velocidad;
+                        break;
+                        case 81:
+                            pausaMaestra = !pausaMaestra;
+                            break;
+                }
+            })
+
+            //Clases
+            class DetectionParam{
+                constructor(_x,_y,_width,_height){
+                    this.x = _x;
+                    this.y = _y;
+                    this.width = _width;
+                    this.height = _height;
+                }
+                set setX(_x){
+                    this.x = _x;
+                }
+                get getX(){
+                    return this.x;
+                }
+                set setY(_y){
+                    this.y = _y;
+                }
+                get getY(){
+                    return this.y;
+                }
+                set setWidth(_width){
+                    this.width = _width;
+                }
+                get getWidth(){
+                    return this.width;
+                }
+                set setHeight(_height){
+                    this.height = _height;
+                }
+                get getHeight(){
+                    return this.height;
+                }
+            }
+            class Player extends DetectionParam{
+                constructor(_x,_y,_width,_height, _rad){
+                    super(_x,_y,_width,_height);
+                    this.rad = _rad;
+                }
+                get getRad(){
+                    return this.rad;
+                }
+                set setRad(_rad){
+                    this.rad = _rad;
+                }
+            }
+            class Enemy extends DetectionParam{
+                constructor(_x,_y,_width, _img, _movementx, _movementy){
+                    super(_x,_y,_width,_width);
+                    this.img = _img;
+                    this.movementx = _movementx;
+                    this.movementy = _movementy;
+                }
+
+                set setImg(_img){
+                    this.img = _img;
+                }
+                
+                get getImg(){
+                    return this.img;
+                }
+
+                set setMovementx(_movementx){
+				    this.movementx = _movementx;
+                }
+
+                get getMovementx() {
+                    return this.movementx;
+                }
+
+                set setMovementy(_movementy){
+                    this.movementy = _movementy;
+                }
+
+                get getMovementy() {
+                    return this.movementy;
+                }
+
+                set setSecondOption(_secondOption){
+                    this.secondOption = _secondOption;
+                }
+
+                get getSecondOption() {
+                    return this.secondOption;
+                }
+
+                set setNotTheSameWall(_notTheSameWall){
+                    this.notTheSameWall = _notTheSameWall;
+                }
+
+                get getNotTheSameWall() {
+                    return this.notTheSameWall;
+                }
+            }
+            class Wall extends DetectionParam{
+                constructor(_x,_y,_width,_height){
+                    super(_x,_y,_width,_height);
+                }
+            }
+            class Fruit extends DetectionParam{
+                constructor(_x,_y,_width,_height,_image,_puntuacion){
+                    super(_x,_y,_width,_height);
+                    this.image = _image;
+                    this.points = _puntuacion;
+                }
+            }
+            let fruits = [];
+            fruits = [new Fruit(250,270,30,30,imgApple,50),
+                      new Fruit(1060,400,30,30,imgBanana,100),
+                      new Fruit(920,680,30,30,imgStrawberry,150),
+                      new Fruit(550,100,30,30,imgFruit,200)];
+                      
+            class Points extends DetectionParam{
+                constructor(_x,_y,_width,_height,_puntuacion){
+                    super(_x,_y,_width,_height);
+                    this.points = _puntuacion;
+                }
+            }
+                    
+            class Change extends DetectionParam{
+                constructor(_x,_y,_width,_height){
+                    super(_x,_y,_width,_height);
+                }
+            }
+            //Creacion de objetos del mapa
+            let player = new Player(35,725,20,20,20);
+
+            //Graficos
+            //Variables del dibujado jugador/pacman
+            let radio = 20, x = 0, y = 0;
+            let iterator = 0;
+            let mouthAngle = 0; // Initial mouth angle
+            let bocaFlag = false;             
+            let direction = null;
+
+            //Animación y movimiento del pacman
+            function animacionPacman() {
+                //Circulo de pacman
+                ctx.beginPath();
+                x = player.getX + player.getRad;
+                y = player.getY + player.getRad;
+                ctx.moveTo(x, y);
+                //Angulo de la boca
+                const mouthRadians = (mouthAngle * Math.PI) / 260;
+                let startAngle, endAngle;
+                if (direction === 90) { // Arriba
+                    startAngle = (Math.PI * 1.5) + (mouthRadians / 2);
+                    endAngle = (Math.PI * 1.5) - (mouthRadians / 2);
+                } else if (direction === 270) { // Abajo
+                    startAngle = (Math.PI * 0.5) + (mouthRadians / 2);
+                    endAngle = (Math.PI * 0.5) - (mouthRadians / 2);
+                } else { // Izquierda - Derecha
+                    startAngle = (mouthRadians / 2) + (direction * Math.PI) / 180;
+                    endAngle = (2 * Math.PI) - ((mouthRadians / 2) + (direction * Math.PI) / 180);
+                }
+                //Boca
+                ctx.arc(x, y, player.getRad, startAngle, endAngle); 
+                ctx.lineTo(x, y); 
+                ctx.fillStyle = "yellow"; 
+                ctx.fill();
+                //Abrir o cerrar la boca
+                if (!bocaFlag) {
+                    mouthAngle += 10;
+                    if (mouthAngle >= 90) {
+                        bocaFlag = true;
+                    }
+                } else {
+                    mouthAngle -= 10;
+                    if (mouthAngle <= 0) {
+                        bocaFlag = false;
+                    }
+                }
+                //Mover al jugador
+                player.x += moveX;
+                player.y += moveY;
+            }
+
+            //Variables para dibujar secciones de pared
+            let altura = 14, anchura = 58, alturav = 58, anchurav = 13, grosorLinea = 8, walls = [];
+            let gap = 1;
+            let createFlag = false;
+            let _indexx = 0;
+            function cuerpoRectangulo(_x,_y,_orientacion,_agujero){
+                ctx.beginPath();
+                ctx.fillStyle = "black";
+                if(_orientacion == 1){
+                    if(!createFlag)
+                        walls[_indexx] = (new Wall(_x,_y,anchura,altura));
+                    
+                    if(walls[_indexx].getX == 9999){
+                        _indexx++;
+                        return;
+                    }else 
+                        ctx.rect(walls[_indexx].getX+7,walls[_indexx].getY,anchura-15,altura);
+                }
+                else{
+                    if(!createFlag)
+                        walls[_indexx] = (new Wall(_x, _y,anchurav, alturav));
+
+                    if(walls[_indexx].getX == 9999){
+                        _indexx++;
+                        return;
+                    }else 
+                        ctx.rect(walls[_indexx].getX,walls[_indexx].getY+7,anchurav,alturav-15);
+                       
+                }
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.lineWidth = grosorLinea;
+                if(_orientacion == 1){
+                    ctx.moveTo(_x+gap,_y);
+                    ctx.lineTo(_x+anchura-gap,_y);
+                }else{
+                    ctx.moveTo(_x+anchurav,_y+gap);
+                    ctx.lineTo(_x+anchurav,_y+alturav-gap);
+                }
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.strokeStyle = "blue";
+                if(_orientacion == 1){
+                    ctx.moveTo(_x+gap,_y+altura);
+                    ctx.lineTo(_x+anchura-gap,_y+altura);
+                }else{
+                    ctx.moveTo(_x,_y+gap);
+                    ctx.lineTo(_x,_y+alturav-gap);
+                }
+                ctx.stroke();
+                _indexx += 1;
+            }   
+            //Cambiar a crear muros
+            let changeWallsHeight = 10;
+            let changeWallsWidth = 12;
+            changewalls = [
+                            new Change(580,270,changeWallsWidth,changeWallsHeight),
+                            new Change(560,270,changeWallsWidth,changeWallsHeight),
+                            new Change(620,270,changeWallsWidth,changeWallsHeight),
+                           new Change(470,270,changeWallsWidth,changeWallsHeight),
+                           new Change(470,160,changeWallsWidth,changeWallsHeight),
+                           new Change(556,160,changeWallsWidth,changeWallsHeight),
+                           new Change(550,40,changeWallsWidth,changeWallsHeight),
+                           new Change(250,160,changeWallsWidth,changeWallsHeight),
+                           new Change(30,160,changeWallsWidth,changeWallsHeight),
+                           new Change(30,40,changeWallsWidth,changeWallsHeight),
+                           new Change(250,40,changeWallsWidth,changeWallsHeight),
+                           new Change(250,400,changeWallsWidth,changeWallsHeight),
+                           new Change(250,618,changeWallsWidth,changeWallsHeight),
+                           new Change(30,618,changeWallsWidth,changeWallsHeight),
+                           new Change(30,738,changeWallsWidth,changeWallsHeight),
+                           new Change(250,738,changeWallsWidth,changeWallsHeight),
+                           new Change(545,738,changeWallsWidth,changeWallsHeight),
+                           new Change(545,618,changeWallsWidth,changeWallsHeight),
+                           new Change(470,618,changeWallsWidth,changeWallsHeight),
+                           new Change(470,505,changeWallsWidth,changeWallsHeight),
+                           new Change(580,505,changeWallsWidth,changeWallsHeight), 
+                           new Change(555,505,changeWallsWidth,changeWallsHeight), 
+                           new Change(620,505,changeWallsWidth,changeWallsHeight), 
+                           new Change(580,400,changeWallsWidth,changeWallsHeight), 
+                           
+                            new Change(1170 - 470, 270, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 470, 160, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 556, 160, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 550, 40, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 250, 160, changeWallsWidth, changeWallsHeight),
+                            new Change(1150 - 15, 160, changeWallsWidth, changeWallsHeight),
+                            new Change(1150 - 15, 40, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 250, 40, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 250, 400, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 250, 618, changeWallsWidth, changeWallsHeight),
+                            new Change(1150 - 30, 618, changeWallsWidth, changeWallsHeight),
+                            new Change(1150 - 30, 738, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 250, 738, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 545, 738, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 545, 618, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 470, 618, changeWallsWidth, changeWallsHeight),
+                            new Change(1170 - 470, 505, changeWallsWidth, changeWallsHeight),
+                        ];
+            function dibujarFrutas(){
+                 for (let index = 0; index < fruits.length; index++) {
+                     ctx.beginPath();
+                     ctx.drawImage(fruits[index].image, fruits[index].getX, fruits[index].getY, fruits[index].getWidth, fruits[index].getWidth);
+                 }
+            }
+            
+            let pointsArray = [];
+            function crearPuntos(){
+                for (let index = 0; index < 18; index++) {
+                    console.log("wtf");
+                    pointsArray.push(new Points(55 + (30*index),55,30,30));
+                }
+                for (let index = 0; index < 18; index++) {
+                    console.log("wtf");
+                    pointsArray.push(new Points(55 + (30*index),175,30,30));
+                }
+                for (let index = 0; index < 18; index++) {
+                    console.log("wtf");
+                    pointsArray.push(new Points(55 + (30*index),630,30,30));
+                }
+                for (let index = 0; index < 18; index++) {
+                    console.log("wtf");
+                    pointsArray.push(new Points(55 + (30*index),750,30,30));
+                }
+
+                for (let index = 0; index < 18; index++) {
+                    console.log("wtf");
+                    pointsArray.push(new Points(640 + (30*index),55,30,30));
+                }
+                for (let index = 0; index < 18; index++) {
+                    console.log("wtf");
+                    pointsArray.push(new Points(640 + (30*index),175,30,30));
+                }
+                for (let index = 0; index < 18; index++) {
+                    console.log("wtf");
+                    pointsArray.push(new Points(640 + (30*index),630,30,30));
+                }
+                for (let index = 0; index < 18; index++) {
+                    console.log("wtf");
+                    pointsArray.push(new Points(640 + (30*index),750,30,30));
+                }
+                for (let index = 0; index < 14; index++) {
+                    console.log("wtf");
+                    pointsArray.push(new Points(265,210 + (30*index),30,30));
+                }
+                console.log("Largo de array"+pointsArray.length);
+            }
+            crearPuntos();
+            function dibujarEscenario(){
+                //Dibujar zonas de cambio
+                for (let index = 0; index < changewalls.length; index++) {
+                    ctx.beginPath();
+                    ctx.fillStyle = "black";
+                    ctx.rect(changewalls[index].getX, changewalls[index].getY, changewalls[index].getWidth, changewalls[index].getHeight);
+                    ctx.fill();
+                }
+                for (let index = 0; index < pointsArray.length; index++) {
+                    ctx.beginPath();
+                    ctx.fillStyle = "yellow"
+                    ctx.arc(pointsArray[index].getX,pointsArray[index].getY,5,Math.PI * 2, false);
+                    ctx.fill();
+                }
+                _indexx = 0;
+                //Apertura en la pared de arriba
+                for(let i = 0; i<(1220-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + (i*anchura)-22,10,1,true);
+                }
+                //Apertura en la parte de abajo
+                for(let i = 0; i<(1220-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + (i*anchura)-22,775,1,true);
+                }
+                //Pared vertical izquierda
+                for(let i = 0; i<(820-anchura*2)/anchura; i++){
+                    if(i != 6 && i != 7 && i != 5 && i != 8 && i != 4 && i != 3 && i != 9){
+                        cuerpoRectangulo(10, 24 + (i*anchura),2,true);
+                    }
+                }
+                //boca de la pared izquierda arriba
+                for(let i = 0; i<(300-anchura*2)/anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(anchura + (i*anchura)-79,298,1,true);
+                    }
+                }
+                for(let i = 0; i<(240-anchura*2)/anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(anchura + (i*anchura)-22,200,1,true);
+                    }
+                }
+                //boca de la pared izquierda abajo
+                for(let i = 0; i<(300-anchura*2)/anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(anchura + (i*anchura)-79,490,1,true);
+                    }
+                }
+                for(let i = 0; i<(280-anchura*2)/anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(anchura + (i*anchura)-22,585,1,true);
+                    }
+                }
+                //tapa de la boca izquierda
+                for(let i = 3; i<(820-anchura*2)/anchura; i++){
+                    if(i != 6 && i != 7 && i != 5 && i != 11 && i != 12 && i != 10 && i != 11){
+                        cuerpoRectangulo(216, 24 + (i*anchura),2,true);
+                    }
+                }       
+                //Pared vertical derecha
+                for(let i = 0; i<(820-anchura*2)/anchura; i++){
+                    if(i != 6 && i != 7 && i != 8  && i != 9  && i != 5  && i != 4  && i != 3){
+                        cuerpoRectangulo(1175, 24 + (i*anchura),2,true);
+                    }
+                }    
+                //boca de la pared derecha arriba
+                let moverBocaDerecha = 330;
+                for(let i = 0; i < (300 - anchura * 2) / anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(790 + moverBocaDerecha - 30 - (i * anchura) + 79, 298, 1, true);
+                    }
+                }
+                for(let i = 0; i < (240 - anchura * 2) / anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(758+ moverBocaDerecha - (i * anchura) + 22, 200, 1, true);
+                    }
+                }
+                //boca de la pared derecha abajo
+                for(let i = 0; i < (300 - anchura * 2) / anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(790+ moverBocaDerecha - 30 - (i * anchura) + 79, 490, 1, true);
+                    }
+                }
+                for(let i = 0; i < (280 - anchura * 2) / anchura; i++){
+                    if(i != 11 && i != 10){
+                        cuerpoRectangulo(758+ moverBocaDerecha- (i * anchura) + 22, 585, 1, true);
+                    }
+                }
+                //tapa de la boca derecha
+                for(let i = 3; i < (820 - anchura * 2) / anchura; i++){
+                    if(i != 6 && i != 7 && i != 5 && i != 11 && i != 12 && i != 10 && i != 11){
+                        cuerpoRectangulo(975, 24 + (i * anchura), 2, true);
+                    }
+                }
+                //Mini pared de abajo a la izquierda
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + (i*anchura)-22,715,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                        cuerpoRectangulo(75, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                        cuerpoRectangulo(216, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + (i*anchura)-22,660,1,true);
+                }
+                //Mini pared de abajo a la derecha
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + moverse + (i*anchura)-22,715,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                        cuerpoRectangulo(75 + moverse, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                        cuerpoRectangulo(216 + moverse, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + moverse + (i*anchura)-22,660,1,true);
+                }
+                //Mini pared de arriba a la izquierda
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + (i*anchura)-22,135   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + (i*anchura)-22,75   ,1,true);
+                }
+                //Mini pared arriba a la derecha
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + moverse + (i*anchura)-22,135   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75+ moverse, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216+ moverse, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(240-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura+ moverse + (i*anchura)-22,75   ,1,true);
+                }
+                //Mini pared arriba a la derecha
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 250 + (i*anchura)-22,135   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75 + 250, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216 + 308, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 250 + (i*anchura)-22,75   ,1,true);
+                }
+                //Mini pared arriba a la derecha
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 250 + (i*anchura)-22, 715   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75 + 250, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216 + 308, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 250 + (i*anchura)-22,660   ,1,true);
+                }
+                //Mini pared arriba a la derecha
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 590 + (i*anchura)-22, 715   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75 + 590, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216 + 648, 665 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 590 + (i*anchura)-22,660   ,1,true);
+                }
+                //Mini pared arriba a la derecha
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 590 + (i*anchura)-22, 135   ,1,true);
+                }
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(75 + 590, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(120-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(216 + 648, 84 + (i*anchura),2,true);
+                }   
+                for(let i = 1; i<(320-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 590 + (i*anchura)-22,75,1,true);
+                }
+                for(let i = 0; i<(300-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(595, 30 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(300-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(595, 537 + (i*anchura),2,true);
+                }
+                //division tipo T izquierda
+                for(let i = 0; i<(500-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(300, 200 + (i*anchura),2,true);
+                }   
+                for(let i = 0; i<(500-anchura*2)/anchura; i++){
+                    if(i != 3 && i != 2 && i != 4)
+                        cuerpoRectangulo(440, 200 + (i*anchura),2,true);
+                }
+                for(let i = 1; i<(280-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 340 + (i*anchura)-22,320,1,true);
+                }   
+                for(let i = 1; i<(280-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 340 + (i*anchura)-22,472,1,true);
+                }   
+                for(let i = 1; i<(280-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 225 + (i*anchura)-22,200,1,true);
+                }
+                for(let i = 1; i<(280-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(anchura + 225 + (i*anchura)-22,593,1,true);
+                }
+                for(let i = 2; i<(400-anchura*2)/anchura; i++){
+                    cuerpoRectangulo(555, 200 + (i*anchura),2,true);
+                }   
+                //division tipo T derecha
+                let moverT = 580;
+                for(let i = 0; i < (500 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(310 + moverT, 200 + (i * anchura), 2, true);
+                }
+                for(let i = 0; i < (500 - anchura * 2) / anchura; i++){
+                    if(i != 3 && i != 2 && i != 4)
+                        cuerpoRectangulo(170 + moverT, 200 + (i * anchura), 2, true);
+                }
+                for(let i = 1; i < (280 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(anchura + moverT + 110 - (i * anchura) + 22, 320, 1, true);
+                }
+                for(let i = 1; i < (280 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(anchura + moverT + 110 - (i * anchura) + 22, 472, 1, true);
+                }
+                for(let i = 1; i < (280 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(anchura + moverT + 225 - (i * anchura) + 22, 200, 1, true);
+                }
+                for(let i = 1; i < (280 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(anchura + moverT + 225 - (i * anchura) + 22, 593, 1, true);
+                }
+                for(let i = 2; i < (400 - anchura * 2) / anchura; i++){
+                    cuerpoRectangulo(60 + moverT, 200 + (i * anchura), 2, true);
+                }
+                createFlag = true;
+            }
+            function cambioDeLugarMapa(_player){
+                if(_player.getY + _player.getHeight < 0)
+                    _player.y = 780;
+                if(_player.getY > 780)
+                    _player.y = 5;
+                if(_player.getX + _player.getWidth < 0)
+                    _player.x = 1170;
+                if(_player.getX > 1170)
+                    _player.x = 0;
+            }
+            function detectorColisiones(_player){
+                colisionesDelJugador(_player, fruits,false,false,true);
+                colisionesDelJugador(_player, walls,false,true,false);
+                colisionesDelJugador(_player, enemies,true,false,false);
+                colisionesDelJugador(_player, normalEnemies,true,false,false);
+                asignacionDeMuro(normalEnemies,false);
+                asignacionDeMuro(enemies,true);
+                detectorColisionesEnemigosMuros(normalEnemies);
+                detectorColisionesEnemigosMuros(enemies);
+            }
+            function colisionesDelJugador(_player,arregloDeObjetos, enemigos, muros, frutas){
+                for (let index = 0; index < arregloDeObjetos.length; index++) {
+                    if(_player.getX + 10 < arregloDeObjetos[index].getX + arregloDeObjetos[index].getWidth && _player.getX + _player.getWidth*2 -10 > arregloDeObjetos[index].getX
+                    && _player.getY + 10 < arregloDeObjetos[index].getY + arregloDeObjetos[index].getHeight && _player.getY + _player.getHeight*2 -10> arregloDeObjetos[index].getY){
+                        if(enemigos){
+                            console.log(enemigos);
+                            console.log(muros);
+                            _player.setX = 35;
+                            _player.setY = 35;
+                            moveX = 0;
+                            moveY = 0;
+                            for (let index = 0; index < enemies.length; index++) {
+                                enemies[index].setX = 580;
+                                enemies[index].setY = 270;
+                            }
+                            for (let index = 0; index < normalEnemies.length; index++) {
+                                normalEnemies[index].setX = 580;
+                                normalEnemies[index].setY = 270;
+                            }
+                            myAudio.volume = 0.2;
+                            myAudio.play();
+                            vidas -= 1;
+                            pausa = true;
+                        }
+                        if(muros){
+                            console.log("Muro");
+                            collisionIndex = index;
+                            if (direction === 90) { // Arriba
+                                player.y +=10;
+                            } else if (direction === 270) { // Abajo
+                                player.y -=10;
+                            } else if(direction == 180){ // Izquierda 
+                                player.x +=10;
+                            }else { // Derecha
+                                player.x -=10;
+                            }
+                            moveX = 0;
+                            moveY = 0;
+                        }
+                        if (frutas) {
+                            let banderita = false;
+                            comerPared+=1;
+                            eat.play();
+                            while (!banderita) {
+                                const newX = Math.floor(Math.random() * 1100);
+                                const newY = Math.floor(Math.random() * 700);
+                                let colision = false;
+
+                                for (let findex = 0; findex < walls.length; findex++) {
+                                    if(
+                                        newX < walls[findex].getX + walls[findex].getWidth &&
+                                        newX + fruits[index].getWidth > walls[findex].getX &&
+                                        newY < walls[findex].getY + walls[findex].getHeight &&
+                                        newY + fruits[index].getHeight > walls[findex].getY
+                                    ) {
+                                        colision = true;
+                                        break;
+                                    }
+                                }
+
+                                for (let sindex = 0; sindex < fruits.length; sindex++) {
+                                    if (sindex !== index) { 
+                                        if (
+                                            newX < fruits[sindex].getX + fruits[sindex].getWidth &&
+                                            newX + fruits[index].getWidth > fruits[sindex].getX &&
+                                            newY < fruits[sindex].getY + fruits[sindex].getHeight &&
+                                            newY + fruits[index].getHeight > fruits[sindex].getY
+                                        ) {
+                                            colision = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (!colision) {
+                                    fruits[index].setX = newX;
+                                    fruits[index].setY = newY;
+                                    score += fruits[index].points
+                                    banderita = true;
+                                }
+                            }
+                        }
+
+                    }   
+                }
+            }
+            //normalEnemies[findex].movementx == 1
+            //enemies[findex].x +=enemyspeed;
+            let direccionNormalEnemy = 0;
+            let result = 0;
+            function ciclarHastaSerDiferente(_valorAnterior){
+                while(1){
+                    result = Math.round(Math.random());
+                    if(result != _valorAnterior)
+                        break;
+                }
+                return result;
+            }
+            function cambioNormal(_fantasma){
+                if(_fantasma.getMovementx == 0){
+                    direccionNormalEnemy = 0;
+                }else if(_fantasma.getMovementx == 1){
+                    direccionNormalEnemy = 1;
+                }else
+                    direccionNormalEnemy = (_fantasma.getMovementy == 1 ? 2 : 3);
+                
+                if(Math.round(Math.random()) == 0){
+                    _fantasma.setMovementx = ciclarHastaSerDiferente(direccionNormalEnemy);
+                    _fantasma.setMovementy = 2;
+                }else {
+                    _fantasma.setMovementy = ciclarHastaSerDiferente(direccionNormalEnemy);
+                    _fantasma.setMovementx = 2;
+                }
+            }
+
+            function asignacionDeMuro(enemigosArreglo, persecutor){
+                for(let findex = 0; findex < changewalls.length; findex++){
+					for(let sindex = 0; sindex < enemigosArreglo.length; sindex++){
+						if(enemigosArreglo[sindex].getX < changewalls[findex].getX + changewalls[findex].getWidth &&  enemigosArreglo[sindex].getX + 2 > changewalls[findex].getX && 
+						enemigosArreglo[sindex].getY < changewalls[findex].getY + changewalls[findex].getHeight &&  enemigosArreglo[sindex].getY + 2> changewalls[findex].getY){	
+							//tocarBorde(enemies[sindex]);
+                            if(enemigosArreglo[sindex].getNotTheSameWall != findex){
+                                enemigosArreglo[sindex].setNotTheSameWall = findex;
+                                if(persecutor)
+                                    cambioSiguiendoJugador(enemigosArreglo[sindex]);
+                                else{
+                                    cambioNormal(enemigosArreglo[sindex]);
+                                }
+                            }
+                        }		
+					}   
+				}
+            }
+            function detectorColisionesEnemigosMuros(enemigosArreglo){
+                //Detectos de colisiones de enemigos contra los muros
+                for(let findex = 0; findex < walls.length; findex++){
+					for(let sindex = 0; sindex < enemigosArreglo.length; sindex++){
+						if(enemigosArreglo[sindex].getX < walls[findex].getX + walls[findex].getWidth &&  enemigosArreglo[sindex].getX + enemigosArreglo[sindex].getWidth > walls[findex].getX && 
+						enemigosArreglo[sindex].getY < walls[findex].getY + walls[findex].getHeight &&  enemigosArreglo[sindex].getY + enemigosArreglo[sindex].getWidth > walls[findex].getY){	
+                            //0 izquierda
+                            //1 derecha
+                                if(enemigosArreglo[sindex].movementx == 0){
+                                    if(enemigosArreglo[sindex].getNotTheSameWall != null)
+                                        enemigosArreglo[sindex].setY = changewalls[enemigosArreglo[sindex].getNotTheSameWall].getY;
+                                    enemigosArreglo[sindex].x += 5;
+                                    enemigosArreglo[sindex].movementx = 1;
+                                }else if(enemigosArreglo[sindex].movementx == 1){
+                                    if(enemigosArreglo[sindex].getNotTheSameWall != null)
+                                        enemigosArreglo[sindex].setY = changewalls[enemigosArreglo[sindex].getNotTheSameWall].getY;
+                                    enemigosArreglo[sindex].x -= 5;
+                                    enemigosArreglo[sindex].movementx = 0;
+                                }else if(enemigosArreglo[sindex].movementy == 1){
+                                    if(enemigosArreglo[sindex].getNotTheSameWall != null)
+                                        enemigosArreglo[sindex].setX = changewalls[enemigosArreglo[sindex].getNotTheSameWall].getX;
+                                    enemigosArreglo[sindex].y -= 5;
+                                    enemigosArreglo[sindex].movementy = 0;
+                                }else if(enemigosArreglo[sindex].movementy == 0){
+                                    if(enemigosArreglo[sindex].getNotTheSameWall != null)
+                                        enemigosArreglo[sindex].setX = changewalls[enemigosArreglo[sindex].getNotTheSameWall].getX;
+                                        enemigosArreglo[sindex].y += 5;
+                                        enemigosArreglo[sindex].movementy = 1;
+                                }
+                                enemigosArreglo[sindex].setNotTheSameWall = null;
+                        }	
+					}   
+				}
+            }
+            
+            //Destruir Muro en colision
+            function destruirMuro(_index){
+                if(comerPared>0){
+                    walls[_index].x = 9999;
+                    comerPared--;
+                    breakwall.play();
+                }
+            }
+
+            function detectorTeletransporte(coordenada, rango, comparador){
+                return comparador == 1 ? (coordenada < rango) : (coordenada > rango)
+            }
+            
+            //0 y 1 = movimiento 
+            //2 y 3 = parado
+            let enemies = [
+            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),];
+
+            let normalEnemies = [
+            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),];
+
+            //hacer una funcion para simplificar
+            function movimientoEnemigos(){
+                for(let findex = 0; findex < enemies.length; findex++){
+                    if(enemies[findex].movementx == 1){
+                        if(detectorTeletransporte(enemies[findex].getX, 1200, 1))
+                            enemies[findex].x +=enemyspeed;
+                        else
+                            enemies[findex].setX = 0;
+                    }else if(enemies[findex].movementx == 0){
+                        if(detectorTeletransporte(enemies[findex].getX, 0, 2))
+                            enemies[findex].x -=enemyspeed;
+                        else
+                            enemies[findex].setX = 1200;
+                    }else if(enemies[findex].movementy == 0){
+                        if(detectorTeletransporte(enemies[findex].getY, 0, 2))
+                            enemies[findex].y -=enemyspeed;
+                        else
+                            enemies[findex].setY = 800;
+                    }else if(enemies[findex].movementy == 1){
+                        if(detectorTeletransporte(enemies[findex].getY, 800, 1))
+                            enemies[findex].y +=enemyspeed;
+                        else
+                            enemies[findex].setY = 0;
+                    }
+                    ctx.drawImage(enemies[findex].img, enemies[findex].getX, enemies[findex].getY, enemies[findex].getWidth, enemies[findex].getWidth);
+                }
+                for(let findex = 0; findex < normalEnemies.length; findex++){
+                    if(normalEnemies[findex].movementx == 1){
+                        if(detectorTeletransporte(normalEnemies[findex].getX, 1200, 1))
+                            normalEnemies[findex].x +=enemyspeed;
+                        else
+                            normalEnemies[findex].setX = 0;
+                    }else if(normalEnemies[findex].movementx == 0){
+                        if(detectorTeletransporte(normalEnemies[findex].getX, 0, 2))
+                            normalEnemies[findex].x -=enemyspeed;
+                        else
+                            normalEnemies[findex].setX = 1200;
+                    }else if(normalEnemies[findex].movementy == 0){
+                        if(detectorTeletransporte(normalEnemies[findex].getY, 0, 2))
+                        normalEnemies[findex].y -=enemyspeed;
+                        else
+                            normalEnemies[findex].setY = 800;
+                    }else if(normalEnemies[findex].movementy == 1){
+                        if(detectorTeletransporte(normalEnemies[findex].getY, 800, 1))
+                            normalEnemies[findex].y +=enemyspeed;
+                        else
+                            normalEnemies[findex].setY = 0;
+                    }
+                    ctx.drawImage(normalEnemies[findex].img, normalEnemies[findex].getX, normalEnemies[findex].getY, normalEnemies[findex].getWidth, normalEnemies[findex].getWidth);
+                }
+            }
+            let distanciaX = 0, distanciaY = 0;
+            let distanciaXAbs;
+            let distanciaYAbs;
+            
+            function cambioSiguiendoJugador(fantasma){
+                distanciaX = fantasma.getX - player.getX-10;
+                distanciaY = fantasma.getY - player.getY-10;
+                distanciaXAbs = Math.abs(distanciaX);
+                distanciaYAbs = Math.abs(distanciaY);
+
+                if(Math.round(Math.random(2)) == 1){
+                    if(distanciaX < 0){
+                        fantasma.movementx = 1;
+                    }else{
+                        fantasma.movementx = 0;
+                    }
+
+                    fantasma.movementy = 2;
+                }else{
+                    if(distanciaY < 0){
+                        fantasma.movementy = 1;
+                    }else{
+                        fantasma.movementy = 0;
+                    }
+                    fantasma.movementx = 2;
+                }
+            }
+            let generarNormal = false;
+            let generarFuerte = false;
+            function enemigos(){
+                movimientoEnemigos();
+                if(!generarNormal){
+                    console.log("Generando Pinky");
+                    generarNormal = !generarNormal;
+                    normalEnemies[normalEnemies.length] = new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2)));
+                }else if(!generarFuerte){
+                    console.log("Generando Blinky");
+                    generarFuerte = !generarFuerte;
+                    enemies[enemies.length] = new Enemy(580,380,30,img,2,Math.round(Math.random(2)));
+                }
+            }
+            
+            let minutos = 0;
+            function mostrarTiempo(){
+                ctx.beginPath();
+                ctx.font = "60px Arial"; 
+                ctx.fillStyle = "white";
+                if (tiempo > 9) {
+                    ctx.fillText(tiempo, 710, 420);
+                    if(tiempo > 59){
+                        minutos += 1;
+                        tiempo = 0;
+                    }
+                } else {
+                    ctx.fillText("0" + tiempo, 710, 420);
+                }
+
+                if (minutos > 0) {
+                    ctx.fillText("0"+minutos, 430, 420);
+                } else {
+                    ctx.fillText("00", 430, 420);
+                }
+
+            }
+            let cuentraAtras = 3;
+            let score = 0;
+            function mostrarTiempoInicio(){
+                ctx.beginPath();
+                ctx.font = "180px Arial"; 
+                ctx.fillStyle = "white";
+                ctx.fillText(cuentraAtras, 555, 470);
+            }
+            function mostrarCantidadPoder(){
+                ctx.beginPath();
+                ctx.fillStyle = "white";
+                ctx.font = "20px Arial Italic"; 
+                ctx.fillText("Comer Muro: ", 323, 525);
+                ctx.fillText(comerPared, 365, 545);
+            }
+            function mostrarPuntos(){
+                ctx.beginPath();
+                ctx.fillStyle = "white";
+                ctx.font = "20px Arial Italic"; 
+                ctx.fillText("Puntos: "+score, 325, 280);
+            }
+            function mostrarVidas(){
+                ctx.beginPath();
+                ctx.fillStyle = "white";
+                ctx.font = "20px Arial Italic"; 
+                ctx.fillText("Vidas: "+vidas, 793, 525);
+            }
+            function gameOver(){
+                ctx.beginPath();
+                ctx.fillStyle = "Red";
+                ctx.font = "200px Arial Italic"; 
+                ctx.fillText("GAME OVER! ", 5, 450);
+            }
+
+            let contadorr = 0;
+            var ultimoCuadro = 0, fps = 60;
+            let pausa = false;
+            let primeraVez = true;
+            let contPrimeraAux = 0;
+            let contpausa = 0;
+            function Animacion() {
+                var ahora = Date.now();
+                var tiempoTranscurrido = ahora - ultimoCuadro;
+                var intervaloCuadro = 1000 / fps;  
+                if (tiempoTranscurrido > intervaloCuadro) {
+                    ultimoCuadro = ahora - (tiempoTranscurrido % intervaloCuadro);
+                    if(!pausa && contPrimeraAux != 1 && !pausaMaestra){
+                        fondoNegro();
+                        cambioDeLugarMapa(player);
+                        dibujarEscenario();
+                        enemigos();
+                        dibujarFrutas();
+                        animacionPacman();
+                        mostrarTiempo();
+                        mostrarCantidadPoder();
+                        mostrarVidas();
+                        mostrarPuntos();
+                        detectorColisiones(player);
+                        contpausa = 0;
+                    }else{
+                        mySong.pause();
+                        if(contpausa>1)
+                            pausa = false;
+                        if(primeraVez){
+                            if(primeraVez){
+                                console.log("Primera vez");
+                                pausa = true;
+                                fondoNegro();
+                                dibujarEscenario();
+                                dibujarFrutas();
+                                mostrarTiempoInicio();
+                                if(contpausa>3){
+                                    primeraVez = false;
+                                }
+                            } else {
+                                console.log("se acabo la pausa");
+                                mySong.play();
+                                pausa = false;
+                            }
+                        }
+                    }
+                    contadorr++;
+                    if(primeraVez)
+                        contPrimeraAux += 1;
+                    //Tiempo de espera para que los fantasmas cambien de direccion
+                    if(contadorr>60){
+                        cuentraAtras -=1;
+                        if(pausa)
+                            contpausa++;
+                        tiempo += 1;
+                        contadorr = 0;
+                        if(tiempo != 0 && tiempo % 8 == 0 && !pausa)
+                            generarFuerte = !generarFuerte;
+                        if(tiempo != 0 && tiempo % 4 == 0 && !pausa)
+                            generarNormal = !generarNormal;
+                    }
+                }
+                if(vidas>-1){
+                    window.requestAnimationFrame(Animacion);
+                }else{
+                    mySong.pause();
+                    gameOver();
+                }
+            }
+            Animacion();
+        </script>
+    </body>
+</html>
