@@ -16,8 +16,10 @@
         <img id="platano" src="./img/platano.png" width="45px">
         <img id="manzana" src="./img/manzana.png" width="45px">
         <audio id="audio" src="./sounds/pacmanmuerte.mp3"></audio>
+        <audio id="audiocancion" src="./sounds/pacmancancion.mp3"></audio>
         <script>
             let myAudio = document.querySelector('#audio');
+            let mySong = document.querySelector('#audiocancion');
 
             const canvas = document.getElementById("myCanvas");
             const ctx = canvas.getContext("2d");    
@@ -41,7 +43,11 @@
             let moveX = 0, moveY = 0, velocidad = 4; 
             let collisionIndex, lastMovement;
             let moverse = 890;
+            let comerPared = 3;
+            let vidas = 3;
             document.addEventListener("keydown", (e) =>{
+                mySong.play();
+                mySong.volume = 0.1;
                 switch (e.keyCode) {
                     case 87:
                         direction = 90; // Up
@@ -198,7 +204,7 @@
                 }
             }
             //Creacion de objetos del mapa
-            let player = new Player(700,270,20,20,20);
+            let player = new Player(35,725,20,20,20);
 
             //Graficos
             //Variables del dibujado jugador/pacman
@@ -361,7 +367,7 @@
                 //Dibujar zonas de cambio
                 for (let index = 0; index < changewalls.length; index++) {
                     ctx.beginPath();
-                    ctx.fillStyle = "yellow";
+                    ctx.fillStyle = "black";
                     ctx.rect(changewalls[index].getX, changewalls[index].getY, changewalls[index].getWidth, changewalls[index].getHeight);
                     ctx.fill();
                 }
@@ -644,6 +650,7 @@
                             }
                             myAudio.volume = 0.2;
                             myAudio.play();
+                            pausa = true;
                         }
                         if(muros){
                             console.log("Muro");
@@ -705,6 +712,35 @@
                     }   
                 }
             }
+            //normalEnemies[findex].movementx == 1
+            //enemies[findex].x +=enemyspeed;
+            let direccionNormalEnemy = 0;
+            let result = 0;
+            function ciclarHastaSerDiferente(_valorAnterior){
+                while(1){
+                    result = Math.round(Math.random());
+                    if(result != _valorAnterior)
+                        break;
+                }
+                return result;
+            }
+            function cambioNormal(_fantasma){
+                if(_fantasma.getMovementx == 0){
+                    direccionNormalEnemy = 0;
+                }else if(_fantasma.getMovementx == 1){
+                    direccionNormalEnemy = 1;
+                }else
+                    direccionNormalEnemy = (_fantasma.getMovementy == 1 ? 2 : 3);
+                
+                if(Math.round(Math.random()) == 0){
+                    _fantasma.setMovementx = ciclarHastaSerDiferente(direccionNormalEnemy);
+                    _fantasma.setMovementy = 2;
+                }else {
+                    _fantasma.setMovementy = ciclarHastaSerDiferente(direccionNormalEnemy);
+                    _fantasma.setMovementx = 2;
+                }
+            }
+
             function asignacionDeMuro(enemigosArreglo, persecutor){
                 for(let findex = 0; findex < changewalls.length; findex++){
 					for(let sindex = 0; sindex < enemigosArreglo.length; sindex++){
@@ -716,7 +752,7 @@
                                 if(persecutor)
                                     cambioSiguiendoJugador(enemigosArreglo[sindex]);
                                 else{
-                                    
+                                    cambioNormal(enemigosArreglo[sindex]);
                                 }
                             }
                         }		
@@ -770,17 +806,9 @@
             //0 y 1 = movimiento 
             //2 y 3 = parado
             let enemies = [
-            new Enemy(580,380,30,img,2,Math.round(Math.random(2))),
             new Enemy(580,380,30,img,2,Math.round(Math.random(2))),];
 
             let normalEnemies = [
-            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
-            new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),
             new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2))),];
 
             //hacer una funcion para simplificar
@@ -834,13 +862,6 @@
                     ctx.drawImage(normalEnemies[findex].img, normalEnemies[findex].getX, normalEnemies[findex].getY, normalEnemies[findex].getWidth, normalEnemies[findex].getWidth);
                 }
             }
-
-            //Hacer que cada que toque un punto
-            //Saque la distancia que hay en Y
-            //Y la distancia que hay en X
-            //Compare cual de las 2 es la mas corta y escoja esa para avanzar
-            //Si choca con un muro, que es lo que consideramos un error
-            //Hacer que avance hacia la segunda opcion
             let distanciaX = 0, distanciaY = 0;
             let distanciaXAbs;
             let distanciaYAbs;
@@ -868,8 +889,19 @@
                     fantasma.movementx = 2;
                 }
             }
+            let generarNormal = false;
+            let generarFuerte = false;
             function enemigos(){
                 movimientoEnemigos();
+                if(!generarNormal){
+                    console.log("Generando Pinky");
+                    generarNormal = !generarNormal;
+                    normalEnemies[normalEnemies.length] = new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2)));
+                }else if(!generarFuerte){
+                    console.log("Generando Blinky");
+                    generarFuerte = !generarFuerte;
+                    enemies[enemies.length] = new Enemy(580,380,30,img,2,Math.round(Math.random(2)));
+                }
             }
             
             let minutos = 0;
@@ -894,10 +926,38 @@
                 }
 
             }
+            let cuentraAtras = 3;
+            let score = 0;
+            function mostrarTiempoInicio(){
+                ctx.beginPath();
+                ctx.font = "180px Arial"; 
+                ctx.fillStyle = "white";
+                ctx.fillText(cuentraAtras, 555, 470);
+            }
+            function mostrarCantidadPoder(){
+                ctx.beginPath();
+                ctx.fillStyle = "white";
+                ctx.font = "20px Arial Italic"; 
+                ctx.fillText("WallEather: "+comerPared, 323, 525);
+            }
+            function mostrarPuntos(){
+                ctx.beginPath();
+                ctx.fillStyle = "white";
+                ctx.font = "20px Arial Italic"; 
+                ctx.fillText("Puntos: "+score, 323, 525);
+            }
+            function mostrarVidas(){
+                ctx.beginPath();
+                ctx.fillStyle = "white";
+                ctx.font = "20px Arial Italic"; 
+                ctx.fillText("Vidas: "+vidas, 623, 525);
+            }
 
             let contadorr = 0;
             var ultimoCuadro = 0, fps = 60;
             let pausa = false;
+            let primeraVez = true;
+            let contPrimeraAux = 0;
             let contpausa = 0;
             function Animacion() {
                 var ahora = Date.now();
@@ -905,24 +965,54 @@
                 var intervaloCuadro = 1000 / fps;  
                 if (tiempoTranscurrido > intervaloCuadro) {
                     ultimoCuadro = ahora - (tiempoTranscurrido % intervaloCuadro);
-                    if(!pausa){
-                        cambioDeLugarMapa(player);
+                    if(!pausa && contPrimeraAux != 1){
                         fondoNegro();
-                        enemigos();
+                        cambioDeLugarMapa(player);
                         dibujarEscenario();
+                        enemigos();
                         dibujarFrutas();
                         animacionPacman();
                         mostrarTiempo();
+                        mostrarCantidadPoder();
+                        mostrarVidas();
                         detectorColisiones(player);
                         contpausa = 0;
                     }else{
-
+                        mySong.pause();
+                        if(contpausa>1)
+                            pausa = false;
+                        if(primeraVez){
+                            if(primeraVez){
+                                console.log("Primera vez");
+                                pausa = true;
+                                fondoNegro();
+                                dibujarEscenario();
+                                dibujarFrutas();
+                                mostrarTiempoInicio();
+                                if(contpausa>3){
+                                    primeraVez = false;
+                                }
+                            } else {
+                                console.log("se acabo la pausa");
+                                mySong.play();
+                                pausa = false;
+                            }
+                        }
                     }
                     contadorr++;
+                    if(primeraVez)
+                        contPrimeraAux += 1;
                     //Tiempo de espera para que los fantasmas cambien de direccion
                     if(contadorr>60){
+                        cuentraAtras -=1;
+                        if(pausa)
+                            contpausa++;
                         tiempo += 1;
                         contadorr = 0;
+                        if(tiempo != 0 && tiempo % 8 == 0 && !pausa)
+                            generarFuerte = !generarFuerte;
+                        if(tiempo != 0 && tiempo % 4 == 0 && !pausa)
+                            generarNormal = !generarNormal;
                     }
                 }
                 window.requestAnimationFrame(Animacion);
