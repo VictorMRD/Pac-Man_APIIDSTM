@@ -69,7 +69,6 @@
             document.addEventListener("keydown", (e) =>{
                 mySong.play();
                 mySong.volume = 0.1;
-                console.log(e.keyCode);
                 switch (e.keyCode) {
                     case 87:
                         direction = 90; // Up
@@ -509,7 +508,6 @@
                 for (let index = 0; index < 3; index++) {
                     pointsArray.push(new Points(1150,80 + (30*index), 20,20));
                 }
-                console.log("Largo de array"+pointsArray.length);
             }
             crearPuntos();
             function dibujarEscenario(){
@@ -791,8 +789,6 @@
                     if(_player.getX + 10 < arregloDeObjetos[index].getX + arregloDeObjetos[index].getWidth && _player.getX + _player.getWidth*2 -10 > arregloDeObjetos[index].getX
                     && _player.getY + 10 < arregloDeObjetos[index].getY + arregloDeObjetos[index].getHeight && _player.getY + _player.getHeight*2 -10> arregloDeObjetos[index].getY){
                         if(enemigos){
-                            console.log(enemigos);
-                            console.log(muros);
                             _player.setX = 35;
                             _player.setY = 35;
                             moveX = 0;
@@ -825,7 +821,6 @@
                             
                         }
                         if(muros){
-                            console.log("Muro");
                             collisionIndex = index;
                             if (direction === 90) { // Arriba
                                 player.y +=10;
@@ -1074,11 +1069,9 @@
             function enemigos(){
                 movimientoEnemigos();
                 if(!generarNormal){
-                    console.log("Generando Pinky");
                     generarNormal = !generarNormal;
                     normalEnemies[normalEnemies.length] = new Enemy(580,380,30,imgPinky,2,Math.round(Math.random(2)));
                 }else if(!generarFuerte){
-                    console.log("Generando Blinky");
                     generarFuerte = !generarFuerte;
                     enemies[enemies.length] = new Enemy(580,380,30,img,2,Math.round(Math.random(2)));
                 }
@@ -1151,7 +1144,6 @@
                 ctx.font = "20px Arial Italic"; 
                 let puntosT = pointsArray.length;
                 puntosT = puntosT - contGanar;
-                console.log(puntosT);
                 ctx.fillText("Faltan: "+ (puntosT), 773, 250);
             }
 
@@ -1187,7 +1179,6 @@
                             pausa = false;
                         if(primeraVez){
                             if(primeraVez){
-                                console.log("Primera vez");
                                 pausa = true;
                                 fondoNegro();
                                 dibujarEscenario();
@@ -1197,7 +1188,6 @@
                                     primeraVez = false;
                                 }
                             } else {
-                                console.log("se acabo la pausa");
                                 mySong.play();
                                 pausa = false;
                             }
